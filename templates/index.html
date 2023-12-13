@@ -4,6 +4,35 @@
 <head>
     <meta charset="UTF-8">
     <title>Region and City Selection</title>
+    <style>
+        #region-select {
+            display: none;
+        }
+
+        #region-autocomplete {
+            position: relative;
+            display: inline-block;
+        }
+
+        #region-list {
+            position: absolute;
+            z-index: 1;
+            width: 100%;
+            background-color: #f1f1f1;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+        }
+
+        #region-list option {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        #region-list option:hover {
+            background-color: #ddd;
+        }
+    </style>
 </head>
 
 <body>
@@ -14,14 +43,18 @@
         </div>
         <div class="p-6">
             <div class="mb-4">
-                <label for="region-select">Select a Region</label>
+                <label for="region-autocomplete">Select a Region</label>
                 <form action="/search" method="get">
-                    <select id="region-select" name="region">
-                        <option disabled selected>Select a region...</option>
-                        {% for region in regions %}
-                            <option>{{ region }}</option>
-                        {% endfor %}
-                    </select>
+                    <div id="region-autocomplete">
+                        <input type="text" id="region-input" placeholder="Type a region..." name="region">
+                        <select id="region-select" name="region">
+                            <option disabled selected>Select a region...</option>
+                            {% for region in regions %}
+                                <option>{{ region }}</option>
+                            {% endfor %}
+                        </select>
+                        <div id="region-list"></div>
+                    </div>
                     <div>
                         <label for="city-input">Enter City</label>
                         <input type="text" id="city-input" placeholder="Type a city..." name="city">
@@ -31,6 +64,44 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const regionInput = document.getElementById("region-input");
+            const regionSelect = document.getElementById("region-select");
+            const regionList = document.getElementById("region-list");
+
+            regionInput.addEventListener("input", function () {
+                const inputValue = this.value.toLowerCase();
+                const options = Array.from(regionSelect.options);
+
+                const filteredOptions = options.filter(option => {
+                    return option.text.toLowerCase().includes(inputValue);
+                });
+
+                regionList.innerHTML = "";
+                filteredOptions.forEach(option => {
+                    const listItem = document.createElement("div");
+                    listItem.textContent = option.text;
+                    listItem.addEventListener("click", function () {
+                        regionInput.value = option.text;
+                        regionSelect.value = option.value;
+                        regionList.innerHTML = "";
+                    });
+                    regionList.appendChild(listItem);
+                });
+
+                if (inputValue === "") {
+                    regionList.innerHTML = "";
+                }
+            });
+
+            regionInput.addEventListener("focus", function () {
+                regionList.innerHTML = "";
+            });
+        });
+    </script>
+
 </body>
 
 </html>
