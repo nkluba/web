@@ -18,21 +18,15 @@
                 <form action="/search" method="get">
                     <select id="region-select" name="region">
                         <option disabled selected>Select a region...</option>
-                        <option>Harju Maakond</option>
-                        <option>Tartu Maakond</option>
-                        <option>Ida-Viru Maakond</option>
-                        <option>Pärnu Maakond</option>
-                        <option>Lääne Maakond</option>
-                        <option>Rapla Maakond</option>
-                        <option>Võru Maakond</option>
-                        <option>Jõgeva Maakond</option>
-                        <option>Viljandi Maakond</option>
+                        {% for region in regions %}
+                            <option>{{ region }}</option>
+                        {% endfor %}
                     </select>
                     <div>
                         <label for="city-input">Enter City</label>
                         <input type="text" id="city-input" placeholder="Type a city..." name="city">
                     </div>
-                    <button onclick="submitData()">Submit</button>
+                    <button type="submit">Submit</button>
                 </form>
             </div>
         </div>
