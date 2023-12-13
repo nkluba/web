@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, jsonify
 import psycopg2
 
 app = Flask(__name__)
@@ -22,10 +22,33 @@ def get_regions_from_database():
         return []
 
 
+def get_stops_for_region(region):
+    try:
+        connection = psycopg2.connect(db_connection_string)
+        cursor = connection.cursor()
+
+        cursor.execute("SELECT stop_name FROM stops WHERE stop_area = %s", (region,))
+        stops = [row[0] for row in cursor.fetchall()]
+        print("Stops for region {}: {}".format(region, stops))
+        connection.close()
+        return stops
+
+    except Exception as e:
+        print("Error fetching stops from the database:", str(e))
+        return []
+
+
 @app.route('/')
 def index():
     regions = get_regions_from_database()
     return render_template('index.html', regions=regions)
+
+
+@app.route('/get_stops', methods=['GET'])
+def get_stops():
+    region = request.args.get('region')
+    stops = get_stops_for_region(region)
+    return jsonify(stops=stops)
 
 
 if __name__ == '__main__':
