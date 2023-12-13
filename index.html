@@ -1,29 +1,57 @@
-<div class="container mx-auto mt-10 bg-white">
-    <div class="mb-4 p-6">
-        <h2>Select a Region and City in Estonia</h2>
-    </div>
-    <div class="p-6">
-        <div class="mb-4">
-            <label for="region-select">Select a Region</label>
-            <form action="search" method="get">
-            <select id="region-select" name="region">
-                <option disabled selected>Select a region...</option>
-                <option>Harju Maakond</option>
-                <option>Tartu Maakond</option>
-                <option>Ida-Viru Maakond</option>
-                <option>Pärnu Maakond</option>
-                <option>Lääne Maakond</option>
-                <option>Rapla Maakond</option>
-                <option>Võru Maakond</option>
-                <option>Jõgeva Maakond</option>
-                <option>Viljandi Maakond</option>
-            </select>
-            <div>
-                <label for="city-input">Enter City</label>
-                <input type="text" id="city-input" placeholder="Type a city..." name="city">
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Region and City Selection</title>
+</head>
+
+<body>
+
+    <div class="container mx-auto mt-10 bg-white">
+        <div class="mb-4 p-6">
+            <h2>Select a Region and City in Estonia</h2>
+        </div>
+        <div class="p-6">
+            <div class="mb-4">
+                <label for="region-select">Select a Region</label>
+                <form id="searchForm" action="/search" method="post">
+                    <select id="region-select" name="region">
+                        <option disabled selected>Select a region...</option>
+                        <option>Harju Maakond</option>
+                        <option>Tartu Maakond</option>
+                        <option>Ida-Viru Maakond</option>
+                        <option>Pärnu Maakond</option>
+                        <option>Lääne Maakond</option>
+                        <option>Rapla Maakond</option>
+                        <option>Võru Maakond</option>
+                        <option>Jõgeva Maakond</option>
+                        <option>Viljandi Maakond</option>
+                    </select>
+                    <div>
+                        <label for="city-input">Enter City</label>
+                        <input type="text" id="city-input" placeholder="Type a city..." name="city">
+                    </div>
+                    <button type="submit">Submit</button>
+                </form>
             </div>
-            <button onclick="submitData()">Submit</button>
-            </form>
         </div>
     </div>
-</div>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            fetch('/search', {
+                method: 'POST',
+                body: new FormData(this),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.stops);
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+
+</html>
