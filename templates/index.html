@@ -55,11 +55,11 @@
                         </select>
                         <div id="region-list"></div>
                     </div>
-                    <div id="stop-input">
-                        <label for="stop-name">Enter Stop Name</label>
-                        <input type="text" id="stop-name" placeholder="Type a stop name..." name="stop">
-                        <div id="stop-list"></div>
-                    </div>
+                <label for="stop-autocomplete">Enter Stop</label>    
+                <div id="stop-autocomplete">
+                    <input type="text" id="stop-input" placeholder="Type a stop..." name="stop">
+                    <div id="stop-list" class="autocomplete-list"></div>
+                </div>
                     <button type="submit">Submit</button>
                 </form>
             </div>
@@ -71,6 +71,9 @@
             const regionInput = document.getElementById("region-input");
             const regionSelect = document.getElementById("region-select");
             const regionList = document.getElementById("region-list");
+    
+            const stopInput = document.getElementById("stop-input");
+            const stopList = document.getElementById("stop-list");
     
             regionInput.addEventListener("input", function () {
                 const inputValue = this.value.toLowerCase();
@@ -88,7 +91,6 @@
                         regionInput.value = option.text;
                         regionSelect.value = option.value;
                         regionList.innerHTML = "";
-                        fetchStopsForRegion(option.text);
                     });
                     regionList.appendChild(listItem);
                 });
@@ -98,45 +100,41 @@
                 }
             });
     
-            function fetchStopsForRegion(selectedRegion) {
-                fetch(`/get_stops?region=${selectedRegion}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        const stopInput = document.getElementById("stop-name");
-                        const stopList = document.getElementById("stop-list");
+            regionInput.addEventListener("focus", function () {
+                regionList.innerHTML = "";
+            });
     
-                        stopInput.addEventListener("input", function () {
-                            const stopValue = this.value.toLowerCase();
-                            const filteredStops = data.filter(stop => {
-                                return stop.stop_name.toLowerCase().includes(stopValue);
-                            });
+            stopInput.addEventListener("input", function () {
+                const inputValue = this.value.toLowerCase();
     
-                            stopList.innerHTML = "";
-                            filteredStops.forEach(stop => {
-                                const stopItem = document.createElement("div");
-                                stopItem.textContent = stop.stop_name;
-                                stopItem.addEventListener("click", function () {
-                                    stopInput.value = stop.stop_name;
-                                    stopList.innerHTML = "";
-                                });
-                                stopList.appendChild(stopItem);
-                            });
+                const stops = ["Stop 1", "Stop 2", "Stop 3", "Stop 4", "Stop 5"];
     
-                            if (stopValue === "") {
-                                stopList.innerHTML = "";
-                            }
-                        });
+                const filteredStops = stops.filter(stop => {
+                    return stop.toLowerCase().includes(inputValue);
+                });
     
-                        stopInput.addEventListener("focus", function () {
-                            stopList.innerHTML = "";
-                        });
-                    })
-                    .catch(error => {
-                        console.error('Error fetching stops:', error);
+                stopList.innerHTML = "";
+                filteredStops.forEach(stop => {
+                    const listItem = document.createElement("div");
+                    listItem.textContent = stop;
+                    listItem.addEventListener("click", function () {
+                        stopInput.value = stop;
+                        stopList.innerHTML = "";
                     });
-            }
+                    stopList.appendChild(listItem);
+                });
+    
+                if (inputValue === "") {
+                    stopList.innerHTML = "";
+                }
+            });
+    
+            stopInput.addEventListener("focus", function () {
+                stopList.innerHTML = "";
+            });
         });
     </script>
+    
 
 </body>
 

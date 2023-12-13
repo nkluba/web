@@ -27,7 +27,7 @@ def get_stops_for_region(region):
         connection = psycopg2.connect(db_connection_string)
         cursor = connection.cursor()
 
-        cursor.execute("SELECT stop_name FROM stops WHERE stop_area = %s", (region,))
+        cursor.execute("SELECT DISTINCT stop_name FROM stops WHERE stop_area = %s", (region,))
         stops = [row[0] for row in cursor.fetchall()]
         print("Stops for region {}: {}".format(region, stops))
         connection.close()
