@@ -5,7 +5,8 @@
     <div class="p-6">
         <div class="mb-4">
             <label for="region-select">Select a Region</label>
-            <select id="region-select">
+            <form action="search" method="get">
+            <select id="region-select" name="region">
                 <option disabled selected>Select a region...</option>
                 <option>Harju Maakond</option>
                 <option>Tartu Maakond</option>
@@ -17,11 +18,12 @@
                 <option>Jõgeva Maakond</option>
                 <option>Viljandi Maakond</option>
             </select>
+            <div>
+                <label for="city-input">Enter City</label>
+                <input type="text" id="city-input" placeholder="Type a city..." name="city">
+            </div>
+            <button onclick="submitData()">Submit</button>
+            </form>
         </div>
-        <div>
-            <label for="city-input">Enter City</label>
-            <input type="text" id="city-input" placeholder="Type a city...">
-        </div>
-        <button onclick="submitData()">Submit</button>
     </div>
 </div>
