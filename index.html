@@ -37,21 +37,6 @@
             </div>
         </div>
     </div>
-
-    <script>
-        document.getElementById('searchForm').addEventListener('submit', function (event) {
-            event.preventDefault();
-            fetch('/search', {
-                method: 'POST',
-                body: new FormData(this),
-            })
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data.stops);
-                })
-                .catch(error => console.error('Error:', error));
-        });
-    </script>
 </body>
 
 </html>
