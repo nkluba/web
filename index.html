@@ -15,7 +15,7 @@
         <div class="p-6">
             <div class="mb-4">
                 <label for="region-select">Select a Region</label>
-                <form id="searchForm" action="/search" method="post">
+                <form action="search" method="get">
                     <select id="region-select" name="region">
                         <option disabled selected>Select a region...</option>
                         <option>Harju Maakond</option>
@@ -32,7 +32,7 @@
                         <label for="city-input">Enter City</label>
                         <input type="text" id="city-input" placeholder="Type a city..." name="city">
                     </div>
-                    <button type="submit">Submit</button>
+                    <button onclick="submitData()">Submit</button>
                 </form>
             </div>
         </div>
