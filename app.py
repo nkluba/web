@@ -14,6 +14,7 @@ def get_regions_from_database():
         cursor.execute("SELECT DISTINCT stop_area FROM stops")
         regions = [row[0] for row in cursor.fetchall()]
         connection.close()
+        print(regions)
         return regions
 
     except Exception as e:
@@ -57,6 +58,30 @@ def get_stops():
     stops = get_stops_for_region(selected_region)
     return jsonify({'stops': stops})
 
+def get_regions_from_database_autocomplete(input_text):
+    try:
+        connection = psycopg2.connect(db_connection_string)
+        cursor = connection.cursor()
+
+        # Use ILIKE for case-insensitive matching
+        cursor.execute("SELECT DISTINCT stop_area FROM stops WHERE stop_area ILIKE %s", ('%' + input_text + '%',))
+        regions = [row[0] for row in cursor.fetchall()]
+
+        connection.close()
+        return regions
+
+    except Exception as e:
+        print("Error fetching data from the database:", str(e))
+        return []
+
+
+@app.route('/get_regions_autocomplete', methods=['GET'])
+def get_regions_autocomplete():
+    input_text = request.args.get('input')
+    print(input)
+    regions = get_regions_from_database_autocomplete(input_text)
+
+    return jsonify({'regions': regions})
 
 if __name__ == '__main__':
     app.run(debug=True)

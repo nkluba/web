@@ -8,14 +8,6 @@
         .autocomplete {
             position: relative;
             display: inline-block;
-            width: 100%;
-            margin-bottom: 1rem;
-        }
-
-        .autocomplete input {
-            width: 100%;
-            padding: 10px;
-            box-sizing: border-box;
         }
 
         .autocomplete-list {
@@ -37,6 +29,7 @@
             background-color: #ddd;
         }
     </style>
+
 </head>
 
 <body>
@@ -45,24 +38,33 @@
         <div class="mb-4 p-6">
             <h2>Select a Region and City in Estonia</h2>
         </div>
-
         <div class="p-6">
             <div class="mb-4">
-                <!-- Region Form -->
-                <div class="autocomplete">
-                    <label for="region-input">Select a Region</label>
-                    <input type="text" id="region-input" placeholder="Type a region..." name="region">
-                    <div id="region-list" class="autocomplete-list"></div>
+                <label for="region-autocomplete">Select a Region</label>
+                <div class="mb-4">
+                    <form id="region-form">
+                        <label for="region-autocomplete">Select a Region</label>
+                        <div id="region-autocomplete" class="autocomplete">
+                            <input type="text" id="region-input" placeholder="Type a region..." name="region">
+                            <div id="region-list" class="autocomplete-list"></div>
+                        </div>
+                        <button id="submit-region" type="button">Submit Region</button>
+                    </form>
                 </div>
-                <button id="submit-region" type="button">Submit Region</button>
 
                 <!-- Stop Form -->
-                <div class="autocomplete">
-                    <label for="stop-input">Select a Stop</label>
-                    <input type="text" id="stop-input" placeholder="Type a stop..." name="stop">
-                    <div id="stop-list" class="autocomplete-list"></div>
+                <div class="mb-4">
+                    <form id="stop-form" action="/search" method="get">
+                        <label for="stop-autocomplete">Select a Stop</label>
+                        <div id="stop-autocomplete" class="autocomplete">
+
+                            <input type="text" id="stop-input" placeholder="Type a stop..." name="stop">
+
+                            <div id="stop-list" class="autocomplete-list"></div>
+                        </div>
+                        <button type="submit">Submit</button>
+                    </form>
                 </div>
-                <button type="submit">Submit</button>
             </div>
         </div>
     </div>
@@ -70,7 +72,6 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const regionInput = document.getElementById("region-input");
-            const regionSelect = document.getElementById("region-select");
             const regionList = document.getElementById("region-list");
 
             const stopInput = document.getElementById("stop-input");
@@ -80,7 +81,7 @@
             const regionForm = document.getElementById("region-form");
 
             submitRegionButton.addEventListener("click", function () {
-                const selectedRegion = regionInput.value || regionSelect.value;
+                const selectedRegion = regionInput.value;
 
                 if (selectedRegion) {
                     fetch(`/get_stops?region=${selectedRegion}`)
@@ -92,28 +93,24 @@
 
             regionInput.addEventListener("input", function () {
                 const inputValue = this.value.toLowerCase();
-                const options = Array.from(regionSelect.options);
-
-                const filteredOptions = options.filter(option => {
-                    return option.text.toLowerCase().includes(inputValue);
-                });
 
                 regionList.innerHTML = "";
-                filteredOptions.forEach(option => {
-                    const listItem = document.createElement("div");
-                    listItem.textContent = option.text;
-                    listItem.addEventListener("click", function () {
-                        regionInput.value = option.text;
-                        regionSelect.value = option.value;
-                        regionList.innerHTML = "";
-                        fetchStopsAndUpdateDropdown();
-                    });
-                    regionList.appendChild(listItem);
-                });
 
-                if (inputValue === "") {
-                    regionList.innerHTML = "";
-                }
+                fetch(`/get_regions_autocomplete?input=${inputValue}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.regions.forEach(region => {
+                            const listItem = document.createElement("div");
+                            listItem.textContent = region;
+                            listItem.addEventListener("click", function () {
+                                regionInput.value = region;
+                                regionList.innerHTML = "";
+                                fetchStopsAndUpdateDropdown();
+                            });
+                            regionList.appendChild(listItem);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching regions:', error));
             });
 
             regionInput.addEventListener("focus", function () {
@@ -124,22 +121,19 @@
                 event.preventDefault();
             });
 
-            regionSelect.addEventListener("change", function () {
-                const selectedRegion = this.value;
-                fetch(`/get_stops?region=${selectedRegion}`)
-                    .then(response => response.json())
-                    .then(data => updateStopDropdown(data.stops))
-                    .catch(error => console.error('Error fetching stops:', error));
-            });
-
-            stopInput.addEventListener("input", function () {
-                const inputValue = this.value.toLowerCase();
-
-                fetch(`/get_stops_autocomplete?input=${inputValue}`)
-                    .then(response => response.json())
-                    .then(data => updateStopDropdown(data.stops))
-                    .catch(error => console.error('Error fetching stops:', error));
-            });
+            function updateRegionDropdown(regions) {
+                regionList.innerHTML = "";
+                regions.forEach(region => {
+                    const listItem = document.createElement("div");
+                    listItem.textContent = region;
+                    listItem.addEventListener("click", function () {
+                        regionInput.value = region;
+                        regionList.innerHTML = "";
+                        fetchStopsAndUpdateDropdown();
+                    });
+                    regionList.appendChild(listItem);
+                });
+            }
 
             function updateStopDropdown(stops) {
                 stopList.innerHTML = "";
