@@ -14,7 +14,6 @@ def get_regions_from_database():
         cursor.execute("SELECT DISTINCT stop_area FROM stops")
         regions = [row[0] for row in cursor.fetchall()]
         connection.close()
-        print(regions)
         return regions
 
     except Exception as e:
@@ -26,10 +25,8 @@ def get_stops_for_region(region):
     try:
         connection = psycopg2.connect(db_connection_string)
         cursor = connection.cursor()
-        print(region)
         cursor.execute("SELECT stop_name FROM stops WHERE stop_area = %s", (region,))
         stops = [row[0] for row in cursor.fetchall()]
-        print(stops)
         connection.close()
         return stops
 
@@ -54,16 +51,30 @@ def search():
 
 @app.route('/get_stops', methods=['GET'])
 def get_stops():
-    selected_region = request.args.get('region')
-    stops = get_stops_for_region(selected_region)
+    input_region = request.args.get('region')
+    input_stop = request.args.get('stop')
+
+    stops = get_stops_for_region_and_stop(input_region, input_stop)
     return jsonify({'stops': stops})
+
+
+def get_stops_for_region_and_stop(region, stop):
+    try:
+        connection = psycopg2.connect(db_connection_string)
+        cursor = connection.cursor()
+        cursor.execute("SELECT stop_name FROM stops WHERE region = %s AND stop_name ILIKE %s", (region, f"%{stop}%"))
+        stops = [row[0] for row in cursor.fetchall()]
+        connection.close()
+        return stops
+    except Exception as e:
+        print("Error fetching data from the database:", str(e))
+        return []
 
 def get_regions_from_database_autocomplete(input_text):
     try:
         connection = psycopg2.connect(db_connection_string)
         cursor = connection.cursor()
 
-        # Use ILIKE for case-insensitive matching
         cursor.execute("SELECT DISTINCT stop_area FROM stops WHERE stop_area ILIKE %s", ('%' + input_text + '%',))
         regions = [row[0] for row in cursor.fetchall()]
 
@@ -78,7 +89,6 @@ def get_regions_from_database_autocomplete(input_text):
 @app.route('/get_regions_autocomplete', methods=['GET'])
 def get_regions_autocomplete():
     input_text = request.args.get('input')
-    print(input)
     regions = get_regions_from_database_autocomplete(input_text)
 
     return jsonify({'regions': regions})
