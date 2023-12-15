@@ -44,110 +44,134 @@
         <div class="p-6">
             <div class="mb-4">
                 <label for="region-autocomplete">Select a Region</label>
-                <form action="/search" method="get">
-                    <div id="region-autocomplete">
-                        <input type="text" id="region-input" placeholder="Type a region..." name="region">
-                        <select id="region-select" name="region">
-                            <option disabled selected>Select a region...</option>
-                            {% for region in regions %}
-                                <option>{{ region }}</option>
-                            {% endfor %}
-                        </select>
-                        <div id="region-list"></div>
-                    </div>
                     <div class="mb-4">
-                        <label for="stop-autocomplete">Select a Stop</label>
-                        <div id="stop-autocomplete">
-                            <input type="text" id="stop-input" placeholder="Type a stop..." name="stop">
-                            <select id="stop-select" name="stop">
-                                <option disabled selected>Select a stop...</option>
-                                {% for stop in stops %}
-                                    <option>{{ stop }}</option>
-                                {% endfor %}
-                            </select>
-                            <div id="stop-list"></div>
-                        </div>
+                        <form id="region-form">
+                            <label for="region-autocomplete">Select a Region</label>
+                            <div id="region-autocomplete">
+                                <input type="text" id="region-input" placeholder="Type a region..." name="region">
+                                <select id="region-select" name="region">
+                                    <option disabled selected>Select a region...</option>
+                                    {% for region in regions %}
+                                        <option>{{ region }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div id="region-list"></div>
+                            </div>
+                            <button id="submit-region" type="button">Submit Region</button>
+                        </form>
                     </div>
-                    <button type="submit">Submit</button>
-                </form>
+                    
+                    <!-- Stop Form -->
+                    <div class="mb-4">
+                        <form id="stop-form" action="/search" method="get">
+                            <label for="stop-autocomplete">Select a Stop</label>
+                            <div id="stop-autocomplete">
+                                <input type="text" id="stop-input" placeholder="Type a stop..." name="stop">
+                                <select id="stop-select" name="stop">
+                                    <option disabled selected>Select a stop...</option>
+                                    {% for stop in stops %}
+                                        <option>{{ stop }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div id="stop-list"></div>
+                            </div>
+                            <button type="submit">Submit</button>
+                        </form>
+                    </div>
             </div>
         </div>
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const regionInput = document.getElementById("region-input");
-            const regionSelect = document.getElementById("region-select");
-            const regionList = document.getElementById("region-list");
+    document.addEventListener("DOMContentLoaded", function () {
+    const regionInput = document.getElementById("region-input");
+    const regionSelect = document.getElementById("region-select");
+    const regionList = document.getElementById("region-list");
 
-            const stopInput = document.getElementById("stop-input");
-            const stopSelect = document.getElementById("stop-select");
-            const stopList = document.getElementById("stop-list");
+    const stopInput = document.getElementById("stop-input");
+    const stopSelect = document.getElementById("stop-select");
+    const stopList = document.getElementById("stop-list");
 
-            regionInput.addEventListener("input", function () {
-                const inputValue = this.value.toLowerCase();
-                const options = Array.from(regionSelect.options);
+    const submitRegionButton = document.getElementById("submit-region");
+    const regionForm = document.getElementById("region-form");
 
-                const filteredOptions = options.filter(option => {
-                    return option.text.toLowerCase().includes(inputValue);
-                });
+    submitRegionButton.addEventListener("click", function () {
+        const selectedRegion = regionInput.value || regionSelect.value;
 
-                regionList.innerHTML = "";
-                filteredOptions.forEach(option => {
-                    const listItem = document.createElement("div");
-                    listItem.textContent = option.text;
-                    listItem.addEventListener("click", function () {
-                        regionInput.value = option.text;
-                        regionSelect.value = option.value;
-                        regionList.innerHTML = "";
-                    });
-                    regionList.appendChild(listItem);
-                });
+        if (selectedRegion) {
+            // Fetch stops for the selected region and update stop dropdown
+            fetch(`/get_stops?region=${selectedRegion}`)
+                .then(response => response.json())
+                .then(data => updateStopDropdown(data.stops))
+                .catch(error => console.error('Error fetching stops:', error));
+        }
+    });
 
-                if (inputValue === "") {
-                    regionList.innerHTML = "";
-                }
-            });
+     regionSelect.addEventListener("change", function () {
+        // Optionally, you can enable automatic update when region is selected
+        // Fetch stops for the selected region and update stop dropdown
+        const selectedRegion = this.value;
+        fetch(`/get_stops?region=${selectedRegion}`)
+            .then(response => response.json())
+            .then(data => updateStopDropdown(data.stops))
+            .catch(error => console.error('Error fetching stops:', error));
+    });
 
-            regionInput.addEventListener("focus", function () {
-                regionList.innerHTML = "";
-            });
+    regionInput.addEventListener("input", function () {
+        const inputValue = this.value.toLowerCase();
+        const options = Array.from(regionSelect.options);
 
-            regionSelect.addEventListener("change", function () {
-                const selectedRegion = this.value;
-
-                fetch(`/get_stops?region=${selectedRegion}`)
-                    .then(response => response.json())
-                    .then(data => updateStopDropdown(data.stops))
-                    .catch(error => console.error('Error fetching stops:', error));
-            });
-
-            const form = document.querySelector('form');
-            form.addEventListener('submit', function(event) {
-                event.preventDefault();
-                
-                const selectedRegion = regionSelect.value;
-                fetch(`/get_stops?region=${selectedRegion}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        updateStopDropdown(data.stops);
-                    })
-                    .catch(error => console.error('Error fetching stops:', error));
-            });
-
-            function updateStopDropdown(stops) {
-                stopSelect.innerHTML = "<option disabled selected>Select a stop...</option>";
-                stops.forEach(stop => {
-                    const option = document.createElement("option");
-                    option.textContent = stop;
-                    stopSelect.appendChild(option);
-                });
-            }
-
-            stopInput.addEventListener("focus", function () {
-                stopList.innerHTML = "";
-            });
+        const filteredOptions = options.filter(option => {
+            return option.text.toLowerCase().includes(inputValue);
         });
+
+        regionList.innerHTML = "";
+        filteredOptions.forEach(option => {
+            const listItem = document.createElement("div");
+            listItem.textContent = option.text;
+            listItem.addEventListener("click", function () {
+                regionInput.value = option.text;
+                regionSelect.value = option.value;
+                regionList.innerHTML = "";
+            });
+            regionList.appendChild(listItem);
+        });
+
+        if (inputValue === "") {
+            regionList.innerHTML = "";
+        }
+    });
+
+    regionInput.addEventListener("focus", function () {
+        regionList.innerHTML = "";
+    });
+
+    regionSelect.addEventListener("change", function () {
+        // Optionally, you can enable automatic update when region is selected
+        // Fetch stops for the selected region and update stop dropdown
+        const selectedRegion = this.value;
+        fetch(`/get_stops?region=${selectedRegion}`)
+            .then(response => response.json())
+            .then(data => updateStopDropdown(data.stops))
+            .catch(error => console.error('Error fetching stops:', error));
+    });
+
+    function updateStopDropdown(stops) {
+        // Clear existing options
+        stopSelect.innerHTML = "<option disabled selected>Select a stop...</option>";
+        // Add new options based on server response
+        stops.forEach(stop => {
+            const option = document.createElement("option");
+            option.textContent = stop;
+            stopSelect.appendChild(option);
+        });
+    }
+
+    stopInput.addEventListener("focus", function () {
+        stopList.innerHTML = "";
+    });
+});
+
     </script>
     
 
