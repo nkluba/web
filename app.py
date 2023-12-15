@@ -55,7 +55,7 @@ def get_stops_for_region_and_stop(region, stop):
     try:
         connection = psycopg2.connect(db_connection_string)
         cursor = connection.cursor()
-        cursor.execute("SELECT stop_name FROM stops WHERE region = %s AND stop_name ILIKE %s", (region, f"%{stop}%"))
+        cursor.execute("SELECT stop_name FROM stops WHERE stop_area = %s AND stop_name ILIKE %s", (region, f"%{stop}%"))
         stops = [row[0] for row in cursor.fetchall()]
         connection.close()
         return stops
