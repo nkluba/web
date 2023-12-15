@@ -83,5 +83,44 @@ def get_regions_autocomplete():
 
     return jsonify({'regions': regions})
 
+@app.route('/get_buses', methods=['GET'])
+def get_buses_for_stop():
+    selected_stop = request.args.get('stop')
+
+    try:
+        connection = psycopg2.connect(db_connection_string)
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            SELECT DISTINCT ON (r.route_short_name)
+                r.route_short_name,
+                t.trip_id,
+                t.trip_long_name,
+                st.arrival_time,
+                st.departure_time
+            FROM stops s
+            JOIN stop_times st ON s.stop_id = st.stop_id
+            JOIN trips t ON st.trip_id = t.trip_id
+            JOIN routes r ON t.route_id = r.route_id
+            WHERE s.stop_name = %s
+            ORDER BY r.route_short_name, st.arrival_time
+        """, (selected_stop,))
+
+        buses = [{
+            'route_short_name': row[0],
+            'trip_id': row[1],
+            'trip_long_name': row[2],
+            'arrival_time': row[3],
+            'departure_time': row[4]
+        } for row in cursor.fetchall()]
+
+        connection.close()
+
+        return jsonify({'buses': buses})
+
+    except Exception as e:
+        print("Error fetching bus data from the database:", str(e))
+        return jsonify({'buses': []})
+
 if __name__ == '__main__':
     app.run(debug=True)
