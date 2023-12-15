@@ -55,9 +55,7 @@
                     <form id="stop-form" action="/search" method="get">
                         <label for="stop-autocomplete">Select a Stop</label>
                         <div id="stop-autocomplete" class="autocomplete">
-
                             <input type="text" id="stop-input" placeholder="Type a stop..." name="stop">
-
                             <div id="stop-list" class="autocomplete-list"></div>
                         </div>
                         <button type="submit">Submit</button>
@@ -68,7 +66,6 @@
                     <h3>List of Buses</h3>
                     <div id="bus-list"></div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -199,14 +196,12 @@
                 buses.sort((a, b) => {
                     const numA = parseInt(a.route_short_name.replace(/\D/g, ''), 10);
                     const numB = parseInt(b.route_short_name.replace(/\D/g, ''), 10);
-
                     return numA - numB;
                 });
 
                 buses.forEach(bus => {
                     const busButton = document.createElement("button");
                     busButton.textContent = `${bus.route_short_name} - ${bus.trip_long_name}`;
-
                     busList.appendChild(busButton);
                 });
             }

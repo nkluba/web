@@ -42,13 +42,6 @@ def index():
     return render_template('index.html', regions=regions, stops=stops)
 
 
-@app.route('/search', methods=['GET'])
-def search():
-    selected_region = request.args.get('region')
-    stops = get_stops_for_region(selected_region)
-    return render_template('index.html', regions=get_regions_from_database(), stops=stops)
-
-
 @app.route('/get_stops', methods=['GET'])
 def get_stops():
     input_region = request.args.get('region')
