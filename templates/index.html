@@ -83,6 +83,7 @@
 
             const stopForm = document.getElementById("stop-form");
             const busList = document.getElementById("bus-list");
+            const busListContainer = document.getElementById("bus-list-container");
 
             submitRegionButton.addEventListener("click", function () {
                 const selectedRegion = regionInput.value;
@@ -191,7 +192,7 @@
             });
 
             function displayBusList(buses) {
-                busList.innerHTML = ""; // Clear existing list
+                busList.innerHTML = "";
 
                 buses.sort((a, b) => {
                     const numA = parseInt(a.route_short_name.replace(/\D/g, ''), 10);
@@ -204,6 +205,56 @@
                     busButton.textContent = `${bus.route_short_name} - ${bus.trip_long_name}`;
                     busList.appendChild(busButton);
                 });
+            }
+            busListContainer.addEventListener("click", function (event) {
+                if (event.target.tagName === 'BUTTON') {
+                    const busButton = event.target;
+                    const busDetails = busButton.textContent.split(' - ');
+                    const busRoute = busButton.textContent.split(' - ', 1)[-1];
+
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            function (position) {
+                                const userLatitude = position.coords.latitude;
+                                const userLongitude = position.coords.longitude;
+
+                                console.log(`User's location: ${userLatitude}, ${userLongitude}`);
+
+                                getClosestStop(userLatitude, userLongitude, busRoute);
+                            },
+                            function (error) {
+                                console.error(`Error getting geolocation: ${error.message}`);
+                            }
+                        );
+                    } else {
+                        console.error("Geolocation is not supported by this browser.");
+                    }
+                }
+            });
+
+            function getClosestStop(userLatitude, userLongitude, busRoute) {
+                fetch('/get_closest_stop', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        latitude: userLatitude,
+                        longitude: userLongitude,
+                        bus_route: busRoute,
+                    }),
+                })
+                    .then(response => response.json())
+                    .then(data => console.log(data))
+                    .catch(error => console.error('Error getting closest stop:', error));
+            }
+
+            function sendUserLocationToServer(latitude, longitude, busRoute) {
+                getClosestStop(latitude, longitude, busRoute)
+                //fetch(`/get_closest_stop?latitude=${latitude}&longitude=${longitude}&bus_route=${busRoute}`)
+                //    .then(response => response.json())
+                //    .then(data => console.log(data))
+                //    .catch(error => console.error('Error sending user location:', error));
             }
         });
 
