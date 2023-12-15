@@ -13,7 +13,6 @@ def get_regions_from_database():
 
         cursor.execute("SELECT DISTINCT stop_area FROM stops")
         regions = [row[0] for row in cursor.fetchall()]
-        print("Regions:", regions)
         connection.close()
         return regions
 
@@ -26,29 +25,30 @@ def get_stops_for_region(region):
     try:
         connection = psycopg2.connect(db_connection_string)
         cursor = connection.cursor()
-
-        cursor.execute("SELECT DISTINCT stop_name FROM stops WHERE stop_area = %s", (region,))
+        print(region)
+        cursor.execute("SELECT stop_name FROM stops WHERE stop_area = %s", (region,))
         stops = [row[0] for row in cursor.fetchall()]
-        print("Stops for region {}: {}".format(region, stops))
+        print(stops)
         connection.close()
         return stops
 
     except Exception as e:
-        print("Error fetching stops from the database:", str(e))
+        print("Error fetching data from the database:", str(e))
         return []
 
 
 @app.route('/')
 def index():
     regions = get_regions_from_database()
-    return render_template('index.html', regions=regions)
+    stops = get_stops_for_region(regions[0] if regions else "")
+    return render_template('index.html', regions=regions, stops=stops)
 
 
-@app.route('/get_stops', methods=['GET'])
-def get_stops():
-    region = request.args.get('region')
-    stops = get_stops_for_region(region)
-    return jsonify(stops=stops)
+@app.route('/search', methods=['GET'])
+def search():
+    selected_region = request.args.get('region')
+    stops = get_stops_for_region(selected_region)
+    return render_template('index.html', regions=get_regions_from_database(), stops=stops)
 
 
 if __name__ == '__main__':
