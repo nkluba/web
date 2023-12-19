@@ -178,12 +178,15 @@
 
             function updateStopDropdown(stops) {
                 stopList.innerHTML = "";
+
                 stops.forEach(stop => {
                     const listItem = document.createElement("div");
-                    listItem.textContent = stop;
+                    listItem.textContent = stop.stop_name;
+                    listItem.dataset.stopId = stop.stop_id;
                     listItem.addEventListener("click", function () {
-                        stopInput.value = stop;
+                        stopInput.value = stop.stop_name;
                         stopList.innerHTML = "";
+                        const selectedStopId = this.dataset.stopId;
                     });
                     stopList.appendChild(listItem);
                 });
