@@ -134,6 +134,8 @@
                     .catch(error => console.error('Error fetching regions:', error));
             });
 
+            let selectedStopId;
+
             stopInput.addEventListener("input", function () {
                 const inputValue = this.value.toLowerCase();
                 const selectedRegion = regionInput.value;
@@ -146,11 +148,10 @@
                         data.stops.forEach(stop => {
                             const listItem = document.createElement("div");
                             listItem.textContent = stop.stop_name;
-                            listItem.dataset.stopId = stop.stop_id;
                             listItem.addEventListener("click", function () {
                                 stopInput.value = stop.stop_name;
                                 stopList.innerHTML = "";
-                                const selectedStopId = this.dataset.stopId;
+                                selectedStopId = stop.stop_id;
                             });
                             stopList.appendChild(listItem);
                         });
@@ -186,7 +187,6 @@
                 stops.forEach(stop => {
                     const listItem = document.createElement("div");
                     listItem.textContent = stop.stop_name;
-                    listItem.dataset.stopId = stop.stop_id;
                     listItem.addEventListener("click", function () {
                         stopInput.value = stop.stop_name;
                         stopList.innerHTML = "";
@@ -216,30 +216,23 @@
                 });
             }
 
-            busListContainer.addEventListener("click", function (event) {
-                if (event.target.tagName === 'BUTTON') {
-                    const busButton = event.target;
-                    const busRoute = busButton.textContent;
+            function getClosestStop(userLatitude, userLongitude, busRoute) {
+                return fetch(`/get_closest_stop?bus_route=${busRoute}&longitude=${userLongitude}&latitude=${userLatitude}`)
+                    .then(response => response.json())
+                    .catch(error => {
+                        console.error('Error getting closest stop:', error);
+                        throw error;
+                    });
+            }
 
-                    if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(
-                            function (position) {
-                                const userLatitude = position.coords.latitude;
-                                const userLongitude = position.coords.longitude;
-
-                                console.log(`User's location: ${userLatitude}, ${userLongitude}`);
-
-                                getClosestStop(userLatitude, userLongitude, busRoute);
-                            },
-                            function (error) {
-                                console.error(`Error getting geolocation: ${error.message}`);
-                            }
-                        );
-                    } else {
-                        console.error("Geolocation is not supported by this browser.");
-                    }
-                }
-            });
+            function getArrivals(busRoute, closestStopId, selectedStop) {
+                return fetch(`/get_closest_arrivals?bus_route=${busRoute}&closest_stop=${closestStopId}&selected_stop=${selectedStop}`)
+                    .then(response => response.json())
+                    .catch(error => {
+                        console.error('Error fetching arrivals:', error);
+                        throw error;
+                    });
+            }
 
             busListContainer.addEventListener("click", function (event) {
                 if (event.target.tagName === 'BUTTON') {
@@ -254,14 +247,16 @@
 
                                 console.log(`User's location: ${userLatitude}, ${userLongitude}`);
 
-                                getClosestStop(userLatitude, userLongitude, busRoute, function (closestStop) {
-                                    const selectedStop = stopInput.value;
-
-                                    fetch(`/get_closest_arrivals?bus_route=${busRoute}&closest_stop=${closestStop.stop_id}&selected_stop=${selectedStop}`)
-                                        .then(response => response.json())
-                                        .then(data => displayArrivals(data.arrivals))
-                                        .catch(error => console.error('Error fetching arrivals:', error));
-                                });
+                                getClosestStop(userLatitude, userLongitude, busRoute)
+                                    .then(function (closestStop) {
+                                        return getArrivals(busRoute, closestStop.closest_stop.stop_id, selectedStopId );
+                                    })
+                                    // .then(function (arrivalsData) {
+                                    //     displayArrivals(arrivalsData.arrivals);
+                                    // })
+                                    .catch(function (error) {
+                                        console.error(`Error getting geolocation or fetching data: ${error.message}`);
+                                    });
                             },
                             function (error) {
                                 console.error(`Error getting geolocation: ${error.message}`);
@@ -282,13 +277,6 @@
                     arrivalItem.textContent = `Bus ${arrival.route_short_name} - ${arrival.trip_long_name}, Arrival Time: ${arrival.arrival_time}`;
                     arrivalsContainer.appendChild(arrivalItem);
                 });
-            }
-
-            function getClosestStop(userLatitude, userLongitude, busRoute, callback) {
-                fetch(`/get_closest_stop?bus_route=${busRoute}&longitude=${userLongitude}&latitude=${userLatitude}`)
-                    .then(response => response.json())
-                    .then(data => callback(data))
-                    .catch(error => console.error('Error getting closest stop:', error));
             }
         });
 
