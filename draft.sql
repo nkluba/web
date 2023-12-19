@@ -28,7 +28,13 @@ ORDER BY s.stop_lat, s.stop_lon;
 -- SELECT stop_name, stop_id, stop_lat, stop_lon
 -- FROM stops
 -- ORDER BY geom <-> ST_SetSRID(ST_MakePoint(stop_lon, stop_lat), 4326);
+-- Riia - Pärnu - Tallinn
+-- 	Tallinn - Pärnu - Riia
+-- are different routes
+-- direction_code take first symbol and last
 
+-- trip_headsign - last stop
+-- get direction of trip by stops, then get last stop and get trip_headsign by it
 
 SELECT s.*
 FROM stops s
