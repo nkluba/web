@@ -179,7 +179,7 @@ def get_stops_for_trip_long_name(trip_long_name):
         return []
 
 
-@app.route('/get_closest_stop', methods=['GET'])
+@app.route('/get_closest_stop', methods=['POST'])
 def get_closest_stop():
     try:
         user_latitude = request.args.get('latitude')

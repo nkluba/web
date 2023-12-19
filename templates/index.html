@@ -210,7 +210,7 @@
                 if (event.target.tagName === 'BUTTON') {
                     const busButton = event.target;
                     const busDetails = busButton.textContent.split(' - ');
-                    const busRoute = busButton.textContent.split(' - ', 1)[-1];
+                    const busRoute = busDetails[0];
 
                     if (navigator.geolocation) {
                         navigator.geolocation.getCurrentPosition(
@@ -234,7 +234,7 @@
 
             function getClosestStop(userLatitude, userLongitude, busRoute) {
                 fetch('/get_closest_stop', {
-                    method: 'GET',
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
