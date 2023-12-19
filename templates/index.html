@@ -251,9 +251,9 @@
                                     .then(function (closestStop) {
                                         return getArrivals(busRoute, closestStop.closest_stop.stop_id, selectedStopId );
                                     })
-                                    // .then(function (arrivalsData) {
-                                    //     displayArrivals(arrivalsData.arrivals);
-                                    // })
+                                     .then(function (arrivalsData) {
+                                         displayArrivals(arrivalsData.arrivals);
+                                     })
                                     .catch(function (error) {
                                         console.error(`Error getting geolocation or fetching data: ${error.message}`);
                                     });

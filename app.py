@@ -213,8 +213,7 @@ def get_closest_stop():
 @app.route('/get_closest_arrivals', methods=['GET'])
 def get_closest_arrivals():
     try:
-        bus_route = request.args.get('bus_route')
-        print(bus_route)
+        bus_route = request.args.get('bus_route').split(' - ', 1)[1] #get Tehase - Kannuka part
         closest_stop_id = request.args.get('closest_stop')
         print(closest_stop_id)
         selected_stop_id = request.args.get('selected_stop')
@@ -240,7 +239,8 @@ def get_closest_arrivals():
             )
             ORDER BY st.trip_id, st.arrival_time
         """, (closest_stop_id, selected_stop_id))
-
+        for row in cursor.fetchall():
+            print(row)
         arrivals = [{
             'route_short_name': row[0],
             'trip_long_name': row[1],
