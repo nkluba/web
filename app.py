@@ -52,7 +52,6 @@ def get_stops():
     stops = get_stops_for_region_and_stop(input_region, input_stop)
     return jsonify({'stops': stops})
 
-
 def get_stops_for_region_and_stop(region, stop):
     try:
         connection = psycopg2.connect(db_connection_string)
@@ -211,6 +210,49 @@ def get_closest_stop():
         return jsonify({'status': 'error', 'message': 'Error processing user location'})
 
 
+@app.route('/get_closest_arrivals', methods=['GET'])
+def get_closest_arrivals():
+    try:
+        bus_route = request.args.get('bus_route')
+        print(bus_route)
+        closest_stop_id = request.args.get('closest_stop')
+        print(closest_stop_id)
+        selected_stop_id = request.args.get('selected_stop')
+        print(selected_stop_id)
+        connection = psycopg2.connect(db_connection_string)
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            SELECT DISTINCT ON (st.trip_id, st.arrival_time)
+                r.route_short_name,
+                t.trip_long_name,
+                st.arrival_time
+            FROM stop_times st
+            JOIN trips t ON st.trip_id = t.trip_id
+            JOIN routes r ON t.route_id = r.route_id
+            WHERE st.stop_id = %s
+            AND st.trip_id IN (
+                SELECT trip_id
+                FROM stop_times
+                WHERE stop_id = %s
+                ORDER BY arrival_time
+                LIMIT 5
+            )
+            ORDER BY st.trip_id, st.arrival_time
+        """, (closest_stop_id, selected_stop_id))
+
+        arrivals = [{
+            'route_short_name': row[0],
+            'trip_long_name': row[1],
+            'arrival_time': row[2].strftime("%H:%M:%S")
+        } for row in cursor.fetchall()]
+
+        return jsonify({'status': 'success', 'arrivals': arrivals})
+
+    except Exception as e:
+        print("Error fetching arrivals from the database:", str(e))
+        return jsonify({'status': 'error', 'message': 'Error fetching arrivals'})
+    
 
 if __name__ == '__main__':
     app.run(debug=True)
