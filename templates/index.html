@@ -248,14 +248,6 @@
                     .then(data => console.log(data))
                     .catch(error => console.error('Error getting closest stop:', error));
             }
-
-            function sendUserLocationToServer(latitude, longitude, busRoute) {
-                getClosestStop(latitude, longitude, busRoute)
-                //fetch(`/get_closest_stop?latitude=${latitude}&longitude=${longitude}&bus_route=${busRoute}`)
-                //    .then(response => response.json())
-                //    .then(data => console.log(data))
-                //    .catch(error => console.error('Error sending user location:', error));
-            }
         });
 
     </script>
