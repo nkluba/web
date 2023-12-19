@@ -179,7 +179,7 @@ def get_stops_for_trip_long_name(trip_long_name):
         return []
 
 
-@app.route('/get_closest_stop', methods=['POST'])
+@app.route('/get_closest_stop', methods=['GET'])
 def get_closest_stop():
     try:
         user_latitude = request.args.get('latitude')
@@ -187,9 +187,7 @@ def get_closest_stop():
         bus_route = request.args.get('bus_route')
         print(bus_route)
         trip_long_name = get_trip_long_name(bus_route)
-        print(trip_long_name)
         stops = get_stops_for_trip_long_name(trip_long_name)
-        print(stops)
         if not stops:
             return jsonify({'status': 'error', 'message': 'No stops found for the given trip_long_name'})
 

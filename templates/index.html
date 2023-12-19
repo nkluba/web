@@ -209,8 +209,7 @@
             busListContainer.addEventListener("click", function (event) {
                 if (event.target.tagName === 'BUTTON') {
                     const busButton = event.target;
-                    const busDetails = busButton.textContent.split(' - ');
-                    const busRoute = busDetails[0];
+                    const busRoute = busButton.textContent;
 
                     if (navigator.geolocation) {
                         navigator.geolocation.getCurrentPosition(
@@ -233,19 +232,9 @@
             });
 
             function getClosestStop(userLatitude, userLongitude, busRoute) {
-                fetch('/get_closest_stop', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        latitude: userLatitude,
-                        longitude: userLongitude,
-                        bus_route: busRoute,
-                    }),
-                })
+                fetch(`/get_closest_stop?bus_route=${busRoute}&longitude=${userLongitude}&latitude=${userLatitude}`)
                     .then(response => response.json())
-                    .then(data => console.log(data))
+                    .then(data => displayBusList(data.buses))
                     .catch(error => console.error('Error getting closest stop:', error));
             }
         });
