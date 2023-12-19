@@ -156,7 +156,7 @@ def haversine(lat1, lon1, lat2, lon2):
 def get_trip_long_name(bus_route):
     return bus_route.split(' - ', 1)[1]
 
-def get_stops_for_trip_long_name(trip_long_name):
+def get_stops_for_trip(trip_long_name):
     try:
         connection = psycopg2.connect(db_connection_string)
         cursor = connection.cursor()
@@ -186,8 +186,10 @@ def get_closest_stop():
         user_longitude = request.args.get('longitude')
         bus_route = request.args.get('bus_route')
         print(bus_route)
-        trip_long_name = get_trip_long_name(bus_route)
-        stops = get_stops_for_trip_long_name(trip_long_name)
+        trip_name = get_trip_long_name(bus_route)
+        print(trip_name)
+        stops = get_stops_for_trip(trip_name)
+        print(stops)
         if not stops:
             return jsonify({'status': 'error', 'message': 'No stops found for the given trip_long_name'})
 
