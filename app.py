@@ -222,24 +222,25 @@ def get_closest_arrivals():
         cursor = connection.cursor()
 
         cursor.execute("""
-            SELECT DISTINCT t.trip_long_name, st1.arrival_time
-            FROM stop_times st1
-            JOIN stop_times st2 ON st1.trip_id = st2.trip_id
-            JOIN stops s1 ON st1.stop_id = s1.stop_id
-            JOIN stops s2 ON st2.stop_id = s2.stop_id
-            JOIN trips t ON st1.trip_id = t.trip_id
-            WHERE t.trip_long_name = %s
-                AND s1.stop_name = %s
-                AND s2.stop_name = %s
-                AND st1.stop_sequence < st2.stop_sequence
-            ORDER BY st1.arrival_time;
+            SELECT DISTINCT t.trip_long_name, st1.arrival_time, r.route_short_name
+FROM stop_times st1
+JOIN stop_times st2 ON st1.trip_id = st2.trip_id
+JOIN stops s1 ON st1.stop_id = s1.stop_id
+JOIN stops s2 ON st2.stop_id = s2.stop_id
+JOIN trips t ON st1.trip_id = t.trip_id
+JOIN routes r ON t.route_id = r.route_id
+WHERE t.trip_long_name = %s
+    AND s1.stop_name = %s
+    AND s2.stop_name = %s
+    AND st1.stop_sequence < st2.stop_sequence
+ORDER BY st1.arrival_time;
         """, (bus_route, closest_stop_name, selected_stop_name))
         arrivals = [{
             'trip_long_name': row[0],
-            'arrival_time': row[1]
+            'arrival_time': row[1],
+            'route_short_name': row[2]
         } for row in cursor.fetchall()]
-        print(arrivals)
-        return jsonify({'status': 'success', 'arrivals': arrivals})
+        return jsonify({'status': 'success', 'arrivals': arrivals, 'closest_stop_id': closest_stop_name})
 
     except Exception as e:
         print("Error fetching arrivals from the database:", str(e))

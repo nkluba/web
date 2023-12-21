@@ -251,9 +251,9 @@
                                     .then(function (closestStop) {
                                         return getArrivals(busRoute, closestStop.closest_stop.stop_id, selectedStopId );
                                     })
-                                     .then(function (arrivalsData) {
+                                     .then(function (arrivalsData, ) {
                                          console.log(arrivalsData)
-                                         displayArrivals(arrivalsData.arrivals);
+                                         displayArrivals(arrivalsData.arrivals, arrivalsData.closest_stop_id);
                                      })
                                     .catch(function (error) {
                                         console.error(`Error getting geolocation or fetching data: ${error.message}`);
@@ -269,14 +269,15 @@
                 }
             });
 
-            function displayArrivals(arrivals) {
+            function displayArrivals(arrivals, stop_name) {
+                console.log("hi")
                 console.log(arrivals)
                 const arrivalsContainer = document.getElementById("arrivals-container");
                 arrivalsContainer.innerHTML = "";
 
                 arrivals.forEach(arrival => {
                     const arrivalItem = document.createElement("div");
-                    arrivalItem.textContent = `Bus ${arrival.route_short_name} - ${arrival.trip_long_name}, Arrival Time: ${arrival.arrival_time}`;
+                    arrivalItem.textContent = `Bus ${arrival.route_short_name} - ${arrival.trip_long_name}, Arrival Time From Closest Stop (${stop_name}): ${arrival.arrival_time}`;
                     arrivalsContainer.appendChild(arrivalItem);
                 });
             }
