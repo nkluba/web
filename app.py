@@ -167,7 +167,7 @@ def get_stops_for_trip(trip_long_name):
         cursor = connection.cursor()
 
         cursor.execute("""
-            SELECT s.stop_id, s.stop_lat, s.stop_lon
+            SELECT s.stop_name, s.stop_lat, s.stop_lon
             FROM stops s
             JOIN stop_times st ON s.stop_id = st.stop_id
             JOIN trips t ON st.trip_id = t.trip_id
@@ -214,39 +214,31 @@ def get_closest_stop():
 def get_closest_arrivals():
     try:
         bus_route = request.args.get('bus_route').split(' - ', 1)[1] #get Tehase - Kannuka part
-        closest_stop_id = request.args.get('closest_stop')
-        print(closest_stop_id)
-        selected_stop_id = request.args.get('selected_stop')
-        print(selected_stop_id)
+        closest_stop_name = request.args.get('closest_stop')
+        print(closest_stop_name)
+        selected_stop_name = request.args.get('selected_stop')
+        print(selected_stop_name)
         connection = psycopg2.connect(db_connection_string)
         cursor = connection.cursor()
 
         cursor.execute("""
-            SELECT DISTINCT ON (st.trip_id, st.arrival_time)
-                r.route_short_name,
-                t.trip_long_name,
-                st.arrival_time
-            FROM stop_times st
-            JOIN trips t ON st.trip_id = t.trip_id
-            JOIN routes r ON t.route_id = r.route_id
-            WHERE st.stop_id = %s
-            AND st.trip_id IN (
-                SELECT trip_id
-                FROM stop_times
-                WHERE stop_id = %s
-                ORDER BY arrival_time
-                LIMIT 5
-            )
-            ORDER BY st.trip_id, st.arrival_time
-        """, (closest_stop_id, selected_stop_id))
-        for row in cursor.fetchall():
-            print(row)
+            SELECT DISTINCT t.trip_long_name, st1.arrival_time
+            FROM stop_times st1
+            JOIN stop_times st2 ON st1.trip_id = st2.trip_id
+            JOIN stops s1 ON st1.stop_id = s1.stop_id
+            JOIN stops s2 ON st2.stop_id = s2.stop_id
+            JOIN trips t ON st1.trip_id = t.trip_id
+            WHERE t.trip_long_name = %s
+                AND s1.stop_name = %s
+                AND s2.stop_name = %s
+                AND st1.stop_sequence < st2.stop_sequence
+            ORDER BY st1.arrival_time;
+        """, (bus_route, closest_stop_name, selected_stop_name))
         arrivals = [{
-            'route_short_name': row[0],
-            'trip_long_name': row[1],
-            'arrival_time': row[2].strftime("%H:%M:%S")
+            'trip_long_name': row[0],
+            'arrival_time': row[1]
         } for row in cursor.fetchall()]
-
+        print(arrivals)
         return jsonify({'status': 'success', 'arrivals': arrivals})
 
     except Exception as e:

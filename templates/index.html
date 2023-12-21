@@ -151,7 +151,7 @@
                             listItem.addEventListener("click", function () {
                                 stopInput.value = stop.stop_name;
                                 stopList.innerHTML = "";
-                                selectedStopId = stop.stop_id;
+                                selectedStopId = stop.stop_name;
                             });
                             stopList.appendChild(listItem);
                         });
@@ -252,6 +252,7 @@
                                         return getArrivals(busRoute, closestStop.closest_stop.stop_id, selectedStopId );
                                     })
                                      .then(function (arrivalsData) {
+                                         console.log(arrivalsData)
                                          displayArrivals(arrivalsData.arrivals);
                                      })
                                     .catch(function (error) {
@@ -269,6 +270,7 @@
             });
 
             function displayArrivals(arrivals) {
+                console.log(arrivals)
                 const arrivalsContainer = document.getElementById("arrivals-container");
                 arrivalsContainer.innerHTML = "";
 
