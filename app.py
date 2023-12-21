@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 import psycopg2
 from math import radians, sin, cos, sqrt, atan2
+import datetime
 
 
 app = Flask(__name__)
@@ -236,11 +237,14 @@ def get_closest_arrivals():
                 AND st1.stop_sequence < st2.stop_sequence
             ORDER BY st1.arrival_time;
         """, (bus_route, closest_stop_name, selected_stop_name))
+        user_time = datetime.datetime.strptime("10:00:00", "%H:%M:%S")
+
         arrivals = [{
             'trip_long_name': row[0],
             'arrival_time': row[1],
             'route_short_name': row[2]
-        } for row in cursor.fetchall()]
+        } for row in cursor.fetchall() if datetime.datetime.strptime(row[1], "%H:%M:%S") > user_time]
+
         return jsonify({'status': 'success', 'arrivals': arrivals, 'closest_stop_id': closest_stop_name})
 
     except Exception as e:
