@@ -104,17 +104,17 @@ def get_buses_for_stop():
 
         cursor.execute("""
             SELECT DISTINCT ON (r.route_short_name)
-    r.route_short_name,
-    t.trip_id,
-    t.trip_long_name,
-    st.arrival_time,
-    st.departure_time
-FROM stops s
-JOIN stop_times st ON s.stop_id = st.stop_id
-JOIN trips t ON st.trip_id = t.trip_id
-JOIN routes r ON t.route_id = r.route_id
-WHERE s.stop_name = %s AND s.stop_area = %s
-ORDER BY r.route_short_name, st.arrival_time;
+            r.route_short_name,
+            t.trip_id,
+            t.trip_long_name,
+            st.arrival_time,
+            st.departure_time
+            FROM stops s
+            JOIN stop_times st ON s.stop_id = st.stop_id
+            JOIN trips t ON st.trip_id = t.trip_id
+            JOIN routes r ON t.route_id = r.route_id
+            WHERE s.stop_name = %s AND s.stop_area = %s
+            ORDER BY r.route_short_name, st.arrival_time;
         """, (selected_stop, selected_region))
 
         buses = [{
@@ -224,17 +224,17 @@ def get_closest_arrivals():
 
         cursor.execute("""
             SELECT DISTINCT t.trip_long_name, st1.arrival_time, r.route_short_name
-FROM stop_times st1
-JOIN stop_times st2 ON st1.trip_id = st2.trip_id
-JOIN stops s1 ON st1.stop_id = s1.stop_id
-JOIN stops s2 ON st2.stop_id = s2.stop_id
-JOIN trips t ON st1.trip_id = t.trip_id
-JOIN routes r ON t.route_id = r.route_id
-WHERE t.trip_long_name = %s
-    AND s1.stop_name = %s
-    AND s2.stop_name = %s
-    AND st1.stop_sequence < st2.stop_sequence
-ORDER BY st1.arrival_time;
+            FROM stop_times st1
+            JOIN stop_times st2 ON st1.trip_id = st2.trip_id
+            JOIN stops s1 ON st1.stop_id = s1.stop_id
+            JOIN stops s2 ON st2.stop_id = s2.stop_id
+            JOIN trips t ON st1.trip_id = t.trip_id
+            JOIN routes r ON t.route_id = r.route_id
+            WHERE t.trip_long_name = %s
+                AND s1.stop_name = %s
+                AND s2.stop_name = %s
+                AND st1.stop_sequence < st2.stop_sequence
+            ORDER BY st1.arrival_time;
         """, (bus_route, closest_stop_name, selected_stop_name))
         arrivals = [{
             'trip_long_name': row[0],
