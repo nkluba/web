@@ -57,12 +57,12 @@ def get_stops_for_region_and_stop(region, stop):
         connection = psycopg2.connect(db_connection_string)
         cursor = connection.cursor()
         cursor.execute("""
-            SELECT stop_id, stop_name
+            SELECT DISTINCT stop_name
             FROM stops
             WHERE stop_area = %s AND stop_name ILIKE %s
         """, (region, f"%{stop}%"))
 
-        stops = [{'stop_id': row[0], 'stop_name': row[1]} for row in cursor.fetchall()]
+        stops = [{'stop_name': row[0]} for row in cursor.fetchall()]
 
         connection.close()
         return stops
@@ -96,6 +96,7 @@ def get_regions_autocomplete():
 @app.route('/get_buses', methods=['GET'])
 def get_buses_for_stop():
     selected_stop = request.args.get('stop')
+    selected_region = request.args.get('region')
 
     try:
         connection = psycopg2.connect(db_connection_string)
@@ -103,18 +104,18 @@ def get_buses_for_stop():
 
         cursor.execute("""
             SELECT DISTINCT ON (r.route_short_name)
-                r.route_short_name,
-                t.trip_id,
-                t.trip_long_name,
-                st.arrival_time,
-                st.departure_time
-            FROM stops s
-            JOIN stop_times st ON s.stop_id = st.stop_id
-            JOIN trips t ON st.trip_id = t.trip_id
-            JOIN routes r ON t.route_id = r.route_id
-            WHERE s.stop_name = %s
-            ORDER BY r.route_short_name, st.arrival_time
-        """, (selected_stop,))
+    r.route_short_name,
+    t.trip_id,
+    t.trip_long_name,
+    st.arrival_time,
+    st.departure_time
+FROM stops s
+JOIN stop_times st ON s.stop_id = st.stop_id
+JOIN trips t ON st.trip_id = t.trip_id
+JOIN routes r ON t.route_id = r.route_id
+WHERE s.stop_name = %s AND s.stop_area = %s
+ORDER BY r.route_short_name, st.arrival_time;
+        """, (selected_stop, selected_region))
 
         buses = [{
             'route_short_name': row[0],
