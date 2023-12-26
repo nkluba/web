@@ -105,21 +105,6 @@
                 const selectedStop = stopInput.value;
                 const selectedRegion = regionInput.value;
 
-                //if (selectedStop) {
-                //    fetch(`/get_buses?stop=${selectedStop}&region=${selectedRegion}`)
-                //        .then(response => response.json())
-                //        .then(data => displayBusList(data.buses))
-                //       .catch(error => console.error('Error fetching buses:', error));
-                //}
-
-
-            });
-
-            stopForm.addEventListener("submit", function (event) {
-                event.preventDefault();
-                const selectedStop = stopInput.value;
-                const selectedRegion = regionInput.value;
-
                 if (selectedStop) {
                     navigator.geolocation.getCurrentPosition(
                         function (position) {
@@ -127,8 +112,8 @@
                             const userLongitude = position.coords.longitude;
 
                             const closestStop = getClosestStop(userLatitude, userLongitude, selectedStop, selectedRegion);
-
-                            fetch(`/get_buses?stop=${selectedStop}&region=${selectedRegion}&closest_stop=${closestStop}`)
+                            console.log(closestStop);
+                            fetch(`/get_buses?stop=${selectedStop}&region=${selectedRegion}&closest_stop=${closestStop.closest_stop.stop_id}`)
                                 .then(response => response.json())
                                 .then(data => displayBusList(data.buses))
                                 .catch(error => console.error('Error fetching buses:', error));
