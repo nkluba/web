@@ -115,7 +115,7 @@
 
                             closestStopPromise.then((result) => {
                                 const closestStopId = result.closest_stop.stop_id;
-
+                                //TODO update code the way that bus schedules will be saved under each button (so to not query db twice)
                                 fetch(`/get_buses?stop=${selectedStop}&region=${selectedRegion}&closest_stop=${closestStopId}`)
                                     .then(response => response.json())
                                     .then(data => displayBusList(data.buses))
