@@ -129,7 +129,7 @@
                             const userLongitude = position.coords.longitude;
                             console.log(`User's location: ${userLatitude}, ${userLongitude}`);
 
-                            const closestStop = getClosestStop(userLatitude, userLongitude, selectedStop);
+                            const closestStop = getClosestStop(userLatitude, userLongitude, selectedStop, selectedRegion);
 
                             fetch(`/get_buses?stop=${selectedStop}&region=${selectedRegion}&closest_stop=${closestStop}`)
                                 .then(response => response.json())
@@ -247,8 +247,8 @@
                 });
             }
 
-            function getClosestStop(userLatitude, userLongitude, selectedStop) {
-                return fetch(`/get_closest_stop?longitude=${userLongitude}&latitude=${userLatitude}&selected_stop=${selectedStop}`)
+            function getClosestStop(userLatitude, userLongitude, selectedStop, selectedRegion) {
+                return fetch(`/get_closest_stop?longitude=${userLongitude}&latitude=${userLatitude}&selected_stop=${selectedStop}&stop_area=$(selectedRegion)`)
                     .then(response => response.json())
                     .catch(error => {
                         console.error('Error getting closest stop:', error);
@@ -275,10 +275,11 @@
                             function (position) {
                                 const userLatitude = position.coords.latitude;
                                 const userLongitude = position.coords.longitude;
+                                const selectedRegion = regionInput.value;
 
                                 console.log(`User's location: ${userLatitude}, ${userLongitude}`);
 
-                                getClosestStop(userLatitude, userLongitude, selectedStopId)
+                                getClosestStop(userLatitude, userLongitude, selectedStopId, selectedRegion)
                                     .then(function (closestStop) {
                                         return getArrivals(busRoute, closestStop.closest_stop.stop_id, selectedStopId);
                                     })
