@@ -42,18 +42,24 @@ JOIN stop_times st ON s.stop_id = st.stop_id
 WHERE st.trip_id = 	1573009
 ORDER BY geom <-> ST_SetSRID(ST_MakePoint(s.stop_lon, s.stop_lat), 4326);
 
--- Get stops which include both stop_1 and user_loc in routes
+-- Get stops which include both stop_1 and user_loc in routes + where direction is from user_loc to stop
 
-SELECT DISTINCT
+SELECT 
+    DISTINCT
     s.stop_name,
     s.stop_lat,
-    s.stop_lon
+    s.stop_lon,
+    t.trip_long_name
 FROM
     stops s
 JOIN
     stop_times st ON s.stop_id = st.stop_id
 JOIN
     trips t ON st.trip_id = t.trip_id
+JOIN
+    stop_times st_tempo ON t.trip_id = st_tempo.trip_id
+JOIN
+    stops s_tempo ON st_tempo.stop_id = s_tempo.stop_id
 WHERE
     t.trip_id IN (
         SELECT
@@ -65,4 +71,5 @@ WHERE
         WHERE
             s_inner.stop_name = 'Tempo'
     )
-    AND s.stop_area = 'Narva linn';
+    AND s.stop_area = 'Narva linn'
+    AND st.stop_sequence < st_tempo.stop_sequence;
