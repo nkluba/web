@@ -189,16 +189,15 @@ def get_stops_for_trip(trip_long_name):
     
 
 def get_closest_stops(selected_stop, stop_area):
-    try:
-        connection = psycopg2.connect(db_connection_string)
-        with connection.cursor() as cursor:
-            sql_query = """
-                SELECT DISTINCT
-                    s.stop_name,
-                    s.stop_lat,
-                    s.stop_lon
-                FROM
-                    stops s
+    connection = psycopg2.connect(db_connection_string)
+    with connection.cursor() as cursor:
+        sql_query = """
+            SELECT DISTINCT
+                s.stop_name,
+                s.stop_lat,
+                s.stop_lon
+            FROM
+                stops s
                 JOIN
                     stop_times st ON s.stop_id = st.stop_id
                 JOIN
@@ -221,15 +220,14 @@ def get_closest_stops(selected_stop, stop_area):
                     AND s.stop_area = %s
                     AND st.stop_sequence < st_tempo.stop_sequence;
             """
-            cursor.execute(sql_query, (selected_stop, stop_area))
-            stops = [{'stop_id': row[0], 'stop_lat': row[1], 'stop_lon': row[2]} for row in cursor.fetchall()]
+        cursor.execute(sql_query, (selected_stop, stop_area))
 
-        connection.close()
-        return stops
-    
-    except Exception as e:
-        print("Error fetching closest stop from the database:", str(e))
-        return []
+        print(cursor.fetchall())
+
+        stops = [{'stop_id': row[0], 'stop_lat': row[1], 'stop_lon': row[2]} for row in cursor.fetchall()]
+
+    connection.close()
+    return stops
     
 
 @app.route('/get_closest_stop', methods=['GET'])
@@ -239,7 +237,7 @@ def get_closest_stop():
         user_longitude = request.args.get('longitude')
         selected_stop = request.args.get('selected_stop')
         stop_area = request.args.get('stop_area')
-
+        print(selected_stop)
         stops = get_closest_stops(selected_stop, stop_area)
 
         print(stops)
