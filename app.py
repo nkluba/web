@@ -78,7 +78,6 @@ def get_regions_from_database_autocomplete(input_text):
 
         cursor.execute("SELECT DISTINCT stop_area FROM stops WHERE stop_area ILIKE %s", ('%' + input_text + '%',))
         regions = [row[0] for row in cursor.fetchall()]
-
         connection.close()
         return regions
 
@@ -98,6 +97,7 @@ def get_regions_autocomplete():
 def get_buses_for_stop():
     selected_stop = request.args.get('stop')
     selected_region = request.args.get('region')
+    closest_stop = request.args.get('closest_stop')
 
     try:
         connection = psycopg2.connect(db_connection_string)
@@ -125,6 +125,8 @@ def get_buses_for_stop():
             'arrival_time': row[3],
             'departure_time': row[4]
         } for row in cursor.fetchall()]
+
+        print(buses)
 
         connection.close()
 
@@ -191,12 +193,16 @@ def get_closest_stop():
     try:
         user_latitude = request.args.get('latitude')
         user_longitude = request.args.get('longitude')
-        bus_route = request.args.get('bus_route')
-        print(bus_route)
-        trip_name = get_trip_long_name(bus_route)
-        print(trip_name)
-        stops = get_stops_for_trip(trip_name)
-        print(stops)
+        selected_stop = request.args.get('selected_stop')
+
+        #ищем bus route включающие в себя две эти остановки, где одна идет раньше другой
+
+        #bus_route = request.args.get('bus_route')
+        #print(bus_route)
+        #trip_name = get_trip_long_name(bus_route)
+        #print(trip_name)
+        stops = get_stops_for_trip(selected_stop)
+        #print(stops)
         if not stops:
             return jsonify({'status': 'error', 'message': 'No stops found for the given trip_long_name'})
 
