@@ -192,37 +192,40 @@ def get_closest_stops(selected_stop, stop_area):
     try:
         connection = psycopg2.connect(db_connection_string)
         cursor = connection.cursor()
-        cursor.execute = ("""
-                SELECT DISTINCT
-                    s.stop_name,
-                    s.stop_lat,
-                    s.stop_lon
-                FROM
-                    stops s
-                JOIN
-                    stop_times st ON s.stop_id = st.stop_id
-                JOIN
-                    trips t ON st.trip_id = t.trip_id
-                JOIN
-                    stop_times st_tempo ON t.trip_id = st_tempo.trip_id
-                JOIN
-                    stops s_tempo ON st_tempo.stop_id = s_tempo.stop_id
-                WHERE
-                    t.trip_id IN (
-                        SELECT
-                            st_inner.trip_id
-                        FROM
-                            stop_times st_inner
-                        JOIN
-                            stops s_inner ON st_inner.stop_id = s_inner.stop_id
-                        WHERE
-                            s_inner.stop_name = %s
-                    )
-                    AND s.stop_area = %s
-                    AND st.stop_sequence < st_tempo.stop_sequence;
-            """, (selected_stop, stop_area))
+
+        sql_query = """
+            SELECT DISTINCT
+                s.stop_name,
+                s.stop_lat,
+                s.stop_lon
+            FROM
+                stops s
+            JOIN
+                stop_times st ON s.stop_id = st.stop_id
+            JOIN
+                trips t ON st.trip_id = t.trip_id
+            JOIN
+                stop_times st_tempo ON t.trip_id = st_tempo.trip_id
+            JOIN
+                stops s_tempo ON st_tempo.stop_id = s_tempo.stop_id
+            WHERE
+                t.trip_id IN (
+                    SELECT
+                        st_inner.trip_id
+                    FROM
+                        stop_times st_inner
+                    JOIN
+                        stops s_inner ON st_inner.stop_id = s_inner.stop_id
+                    WHERE
+                        s_inner.stop_name = %s
+                )
+                AND s.stop_area = %s
+                AND st.stop_sequence < st_tempo.stop_sequence;
+        """
+        cursor.execute(sql_query, (selected_stop, stop_area))
+        
         stops = [{'stop_id': row[0], 'stop_lat': row[1], 'stop_lon': row[2]} for row in cursor.fetchall()]
-        print(stops)
+
         connection.close()
         return stops
     
@@ -238,10 +241,8 @@ def get_closest_stop():
         user_longitude = request.args.get('longitude')
         selected_stop = request.args.get('selected_stop')
         stop_area = request.args.get('stop_area')
-        print(selected_stop)
-        stops = get_closest_stops(selected_stop, stop_area)
 
-        print(stops)
+        stops = get_closest_stops(selected_stop, stop_area)
 
         if not stops:
             return jsonify({'status': 'error', 'message': 'No stops found for the given trip_long_name'})
@@ -250,7 +251,6 @@ def get_closest_stop():
             stop['distance'] = haversine(float(user_latitude), float(user_longitude), float(stop['stop_lat']), float(stop['stop_lon']))
 
         closest_stop = min(stops, key=lambda x: x['distance'])
-        print(closest_stop)
         return jsonify({'status': 'success', 'closest_stop': closest_stop})
 
     except Exception as e:

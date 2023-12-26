@@ -72,3 +72,21 @@ WHERE
     )
     AND s.stop_area = 'Narva linn'
     AND st.stop_sequence < st_tempo.stop_sequence;
+
+
+
+-- select timetable with order
+    
+SELECT DISTINCT t.trip_long_name, s1.stop_name, s2.stop_name, st1.stop_sequence, st2.stop_sequence, st1.arrival_time
+    FROM stop_times st1
+    JOIN stops s1 ON st1.stop_id = s1.stop_id
+    JOIN stop_times st2 ON st1.trip_id = st2.trip_id
+    JOIN stops s2 ON st2.stop_id = s2.stop_id
+    JOIN trips t ON st1.trip_id = t.trip_id
+    WHERE s1.stop_name = 'Sinimäe kool'
+        AND s2.stop_name = 'Sinimäe'
+        AND s1.stop_area = 'Narva-Jõesuu linn'
+        AND s2.stop_area = 'Narva-Jõesuu linn'
+        AND st1.stop_sequence < st2.stop_sequence
+        
+ORDER BY arrival_time;
