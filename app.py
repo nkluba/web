@@ -186,7 +186,51 @@ def get_stops_for_trip(trip_long_name):
     except Exception as e:
         print("Error fetching stops from the database:", str(e))
         return []
+    
 
+def get_closest_stops(selected_stop, stop_area):
+    try:
+        connection = psycopg2.connect(db_connection_string)
+        with connection.cursor() as cursor:
+            sql_query = """
+                SELECT DISTINCT
+                    s.stop_name,
+                    s.stop_lat,
+                    s.stop_lon
+                FROM
+                    stops s
+                JOIN
+                    stop_times st ON s.stop_id = st.stop_id
+                JOIN
+                    trips t ON st.trip_id = t.trip_id
+                JOIN
+                    stop_times st_tempo ON t.trip_id = st_tempo.trip_id
+                JOIN
+                    stops s_tempo ON st_tempo.stop_id = s_tempo.stop_id
+                WHERE
+                    t.trip_id IN (
+                        SELECT
+                            st_inner.trip_id
+                        FROM
+                            stop_times st_inner
+                        JOIN
+                            stops s_inner ON st_inner.stop_id = s_inner.stop_id
+                        WHERE
+                            s_inner.stop_name = %s
+                    )
+                    AND s.stop_area = %s
+                    AND st.stop_sequence < st_tempo.stop_sequence;
+            """
+            cursor.execute(sql_query, (selected_stop, stop_area))
+            stops = [{'stop_id': row[0], 'stop_lat': row[1], 'stop_lon': row[2]} for row in cursor.fetchall()]
+
+        connection.close()
+        return stops
+    
+    except Exception as e:
+        print("Error fetching closest stop from the database:", str(e))
+        return []
+    
 
 @app.route('/get_closest_stop', methods=['GET'])
 def get_closest_stop():
@@ -194,15 +238,12 @@ def get_closest_stop():
         user_latitude = request.args.get('latitude')
         user_longitude = request.args.get('longitude')
         selected_stop = request.args.get('selected_stop')
+        stop_area = request.args.get('stop_area')
 
-        #ищем bus route включающие в себя две эти остановки, где одна идет раньше другой
+        stops = get_closest_stops(selected_stop, stop_area)
 
-        #bus_route = request.args.get('bus_route')
-        #print(bus_route)
-        #trip_name = get_trip_long_name(bus_route)
-        #print(trip_name)
-        stops = get_stops_for_trip(selected_stop)
-        #print(stops)
+        print(stops)
+
         if not stops:
             return jsonify({'status': 'error', 'message': 'No stops found for the given trip_long_name'})
 

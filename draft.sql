@@ -48,8 +48,7 @@ SELECT
     DISTINCT
     s.stop_name,
     s.stop_lat,
-    s.stop_lon,
-    t.trip_long_name
+    s.stop_lon
 FROM
     stops s
 JOIN
