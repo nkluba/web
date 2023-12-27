@@ -105,12 +105,13 @@ def get_buses_for_stop():
         cursor = connection.cursor()
 
         cursor.execute("""
-            SELECT DISTINCT t.trip_long_name, st1.arrival_time AS b_departure, st2.arrival_time AS b_arrival
+            SELECT DISTINCT t.trip_long_name, r.route_short_name, st1.arrival_time AS b_departure, st2.arrival_time AS b_arrival
             FROM stop_times st1
             JOIN stops s1 ON st1.stop_id = s1.stop_id
             JOIN stop_times st2 ON st1.trip_id = st2.trip_id
             JOIN stops s2 ON st2.stop_id = s2.stop_id
             JOIN trips t ON st1.trip_id = t.trip_id
+            JOIN routes r ON t.route_id = r.route_id
             WHERE s1.stop_name = %s
                 AND s2.stop_name = %s
                 AND s1.stop_area = %s
