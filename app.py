@@ -123,7 +123,8 @@ def get_buses_for_stop():
             'trip_long_name': row[0],
             'route_short_name': row[1],
             'b_departure': row[2],
-            'b_arrival': row[3]
+            'b_arrival': row[3],
+            'closest_stop' : closest_stop,
         } for row in cursor.fetchall()]
 
         print(buses)

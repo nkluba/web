@@ -115,8 +115,6 @@
 
                             closestStopPromise.then((result) => {
                                 const closestStopId = result.closest_stop.stop_id;
-                                //TODO select short route name also
-                                //TODO update code the way that bus schedules will be saved under each button (so to not query db twice)
                                 fetch(`/get_buses?stop=${selectedStop}&region=${selectedRegion}&closest_stop=${closestStopId}`)
                                     .then(response => response.json())
                                     .then(data => displayBusList(data.buses))
@@ -240,7 +238,9 @@
                     const busButton = document.createElement("button");
                     const firstBus = buses[0];
                     busButton.textContent = `${firstBus.route_short_name} - ${firstBus.trip_long_name}`;
-
+                    
+                    busButton.closestStop = firstBus.closest_stop;
+                    console.log(firstBus.closest_stop)
                     busButton.bDeparture = buses.map(bus => bus.b_departure);
                     busButton.bArrival = buses.map(bus => bus.b_arrival);
                     console.log(busButton.bDeparture)
@@ -275,18 +275,16 @@
             function displayBusTimes(busButton) {
                 const arrivalsContainer = document.getElementById('arrivals-container');
                 arrivalsContainer.innerHTML = "";
-
+                console.log(busButton.route_short_name)
                 busButton.bDeparture.forEach((departure, index) => {
                     const arrivalItem = document.createElement("div");
-                    arrivalItem.textContent = `Departure Time: ${busButton.bDeparture[index]}, Arrival Time: ${busButton.bArrival[index]}`;
+                    arrivalItem.textContent = `Bus ${busButton.textContent}, Departure Time From Closest Stop (${busButton.closestStop}): ${busButton.bArrival[index]} Arrival Time to Destination: ${busButton.bDeparture[index]}`;
                     arrivalsContainer.appendChild(arrivalItem);
                 });
             }
-
         });
 
     </script>
-
 
 </body>
 
