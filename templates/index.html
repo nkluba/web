@@ -216,16 +216,11 @@
                 });
             }
 
-            stopInput.addEventListener("focus", function () {
-                stopList.innerHTML = "";
-            });
-
             function displayBusList(buses) {
                 const uniqueBusesMap = new Map();
 
                 buses.forEach((bus) => {
                     const tripLongName = bus.trip_long_name;
-
                     if (uniqueBusesMap.has(tripLongName)) {
                         uniqueBusesMap.get(tripLongName).push(bus);
                     } else {
@@ -245,6 +240,16 @@
                     const busButton = document.createElement("button");
                     const firstBus = buses[0];
                     busButton.textContent = `${firstBus.route_short_name} - ${firstBus.trip_long_name}`;
+
+                    busButton.bDeparture = buses.map(bus => bus.b_departure);
+                    busButton.bArrival = buses.map(bus => bus.b_arrival);
+                    console.log(busButton.bDeparture)
+                    console.log(busButton.bArrival)
+
+                    busButton.addEventListener('click', () => {
+                        displayBusTimes(busButton);
+                    });
+
                     busList.appendChild(busButton);
                 });
             }
@@ -270,38 +275,10 @@
             }
 
             busListContainer.addEventListener("click", function (event) {
-                if (event.target.tagName === 'BUTTON') {
-                    const busButton = event.target;
-                    const busRoute = busButton.textContent;
+                const target = event.target;
 
-                    if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(
-                            function (position) {
-                                const userLatitude = position.coords.latitude;
-                                const userLongitude = position.coords.longitude;
-                                const selectedRegion = regionInput.value;
-
-                                console.log(`User's location: ${userLatitude}, ${userLongitude}`);
-
-                                getClosestStop(userLatitude, userLongitude, selectedStopId, selectedRegion)
-                                    .then(function (closestStop) {
-                                        return getArrivals(busRoute, closestStop.closest_stop.stop_id, selectedStopId);
-                                    })
-                                    .then(function (arrivalsData,) {
-                                        console.log(arrivalsData)
-                                        displayArrivals(arrivalsData.arrivals, arrivalsData.closest_stop_id);
-                                    })
-                                    .catch(function (error) {
-                                        console.error(`Error getting geolocation or fetching data: ${error.message}`);
-                                    });
-                            },
-                            function (error) {
-                                console.error(`Error getting geolocation: ${error.message}`);
-                            }
-                        );
-                    } else {
-                        console.error("Geolocation is not supported by this browser.");
-                    }
+                if (target.tagName === "BUTTON") {
+                    displayBusTimes(target);
                 }
             });
 
