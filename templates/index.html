@@ -221,20 +221,34 @@
             });
 
             function displayBusList(buses) {
-                busList.innerHTML = "";
+                const uniqueBusesMap = new Map();
 
-                buses.sort((a, b) => {
-                    const numA = parseInt(a.route_short_name.replace(/\D/g, ''), 10);
-                    const numB = parseInt(b.route_short_name.replace(/\D/g, ''), 10);
+                buses.forEach((bus) => {
+                    const tripLongName = bus.trip_long_name;
+
+                    if (uniqueBusesMap.has(tripLongName)) {
+                        uniqueBusesMap.get(tripLongName).push(bus);
+                    } else {
+                        uniqueBusesMap.set(tripLongName, [bus]);
+                    }
+                });
+
+                const sortedUniqueBuses = [...uniqueBusesMap.values()].sort((a, b) => {
+                    const numA = parseInt(a[0].route_short_name.replace(/\D/g, ''), 10);
+                    const numB = parseInt(b[0].route_short_name.replace(/\D/g, ''), 10);
                     return numA - numB;
                 });
 
-                buses.forEach(bus => {
+                busList.innerHTML = "";
+
+                sortedUniqueBuses.forEach((buses) => {
                     const busButton = document.createElement("button");
-                    busButton.textContent = `${bus.route_short_name} - ${bus.trip_long_name}`;
+                    const firstBus = buses[0];
+                    busButton.textContent = `${firstBus.route_short_name} - ${firstBus.trip_long_name}`;
                     busList.appendChild(busButton);
                 });
             }
+
 
             function getClosestStop(userLatitude, userLongitude, selectedStop, selectedRegion) {
                 console.log(selectedRegion)
@@ -299,7 +313,7 @@
 
                 arrivals.forEach(arrival => {
                     const arrivalItem = document.createElement("div");
-                    arrivalItem.textContent = `Bus ${arrival.route_short_name} - ${arrival.trip_long_name}, Arrival Time From Closest Stop (${stop_name}): ${arrival.arrival_time}`;
+                    arrivalItem.textContent = `Bus ${arrival.route_short_name} - ${arrival.trip_long_name}, Arrival Time From Closest Stop (${stop_name}): ${arrival.b_departure}`;
                     arrivalsContainer.appendChild(arrivalItem);
                 });
             }

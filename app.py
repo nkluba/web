@@ -98,8 +98,7 @@ def get_buses_for_stop():
     selected_stop = request.args.get('stop')
     selected_region = request.args.get('region')
     closest_stop = request.args.get('closest_stop')
-    print(closest_stop)
-    print(selected_stop)
+
     try:
         connection = psycopg2.connect(db_connection_string)
         cursor = connection.cursor()
