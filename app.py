@@ -104,7 +104,7 @@ def get_buses_for_stop():
         cursor = connection.cursor()
 
         cursor.execute("""
-            SELECT DISTINCT t.trip_long_name, r.route_short_name, st1.arrival_time AS b_departure, st2.arrival_time AS b_arrival
+            SELECT DISTINCT t.service_id, t.trip_long_name, r.route_short_name, st1.arrival_time AS b_departure, st2.arrival_time AS b_arrival
             FROM stop_times st1
             JOIN stops s1 ON st1.stop_id = s1.stop_id
             JOIN stop_times st2 ON st1.trip_id = st2.trip_id
@@ -120,10 +120,11 @@ def get_buses_for_stop():
         """, (closest_stop, selected_stop, selected_region, selected_region))
 
         buses = [{
-            'trip_long_name': row[0],
-            'route_short_name': row[1],
-            'b_departure': row[2],
-            'b_arrival': row[3],
+            'service_id': row[0],
+            'trip_long_name': row[1],
+            'route_short_name': row[2],
+            'b_departure': row[3],
+            'b_arrival': row[4],
             'closest_stop' : closest_stop,
         } for row in cursor.fetchall()]
 
