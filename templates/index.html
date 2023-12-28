@@ -241,10 +241,12 @@
                     
                     busButton.closestStop = firstBus.closest_stop;
                     console.log(firstBus.closest_stop)
+                    busButton.serviceID = buses.map(bus => bus.service_id);
                     busButton.bDeparture = buses.map(bus => bus.b_departure);
                     busButton.bArrival = buses.map(bus => bus.b_arrival);
                     console.log(busButton.bDeparture)
                     console.log(busButton.bArrival)
+                    console.log(busButton.serviceID)
 
                     busButton.addEventListener('click', () => {
                         displayBusTimes(busButton);
@@ -278,7 +280,7 @@
                 console.log(busButton.route_short_name)
                 busButton.bDeparture.forEach((departure, index) => {
                     const arrivalItem = document.createElement("div");
-                    arrivalItem.textContent = `Bus ${busButton.textContent}, Departure Time From Closest Stop (${busButton.closestStop}): ${busButton.bArrival[index]} Arrival Time to Destination: ${busButton.bDeparture[index]}`;
+                    arrivalItem.textContent = `Bus ${busButton.textContent}, Departure Time From Closest Stop (${busButton.closestStop}): ${busButton.bArrival[index]} Arrival Time to Destination: ${busButton.bDeparture[index]} SErvice ID ${busButton.serviceID[index]}`;
                     arrivalsContainer.appendChild(arrivalItem);
                 });
             }
