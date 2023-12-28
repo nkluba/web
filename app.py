@@ -303,11 +303,46 @@ def get_closest_arrivals():
 
 @app.route('/get_timetable', methods=['GET'])
 def get_timetable():
-    service_id = request.args.get('service_id')
-    b_departure = request.args.get('bDeparture')
-    b_arrival = request.args.get('bArrival')
+    service_id = request.args.get('service_id').split(',')
+    b_departure = request.args.get('bDeparture').split(',')
+    b_arrival = request.args.get('bArrival').split(',')
     print(service_id, b_departure, b_arrival)
-    return []
+    conn = psycopg2.connect(db_connection_string)
+    cursor = conn.cursor()
+
+    try:
+        current_user_time = datetime.now().strftime('%H:%M:%S')
+        current_user_date = datetime.now().strftime('%Y%m%d')
+
+        closest_arrivals = []
+
+        for i in range(len(service_id)):
+            query = """
+            SELECT service_id, trip_long_name, route_short_name, b_departure, b_arrival
+            FROM your_table_name
+            WHERE service_id = %s
+            """
+            cursor.execute(query, (service_id[i],))
+            timetable_data = cursor.fetchall()
+            print(timetable_data)
+            for _, _, route_short_name, b_departure_db, b_arrival_db in timetable_data:
+                departure_time = datetime.strptime(b_departure_db, '%H:%M:%S').strftime('%H:%M:%S')
+                if departure_time > current_user_time and int(current_user_date) >= 20210501:
+                    closest_arrivals.append({
+                        'service_id': service_id[i],
+                        'route_short_name': route_short_name,
+                        'bDeparture': b_departure_db,
+                        'bArrival': b_arrival_db
+                    })
+
+        closest_arrivals.sort(key=lambda x: x['bArrival'])
+        closest_arrivals = closest_arrivals[:5]
+
+        return jsonify(closest_arrivals)
+
+    finally:
+        cursor.close()
+        conn.close()
 
 
 if __name__ == '__main__':

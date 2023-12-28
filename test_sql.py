@@ -1,64 +1,53 @@
 import psycopg2
+from datetime import datetime, timedelta
 
-# Connect to your PostgreSQL database
 db_connection_string = "postgresql://lubandust:J9fF3NPzVeXW@ep-holy-cake-07968363.eu-central-1.aws.neon.tech/peatus?sslmode=require"
 
-conn = psycopg2.connect(db_connection_string)
 
-# Create a cursor object to execute SQL queries
+# Define the input parameters
+service_ids = [224289, 224290] 
+arrival_times = ['06:07:00', '14:33:00'] 
+departure_times = ['06:20:00', '14:33:00']
+
+# Connect to the database
+conn = psycopg2.connect(db_connection_string)
 cursor = conn.cursor()
 
-# Execute the initial query to get stop_ids
-initial_query = """
-    SELECT DISTINCT
-        s.stop_id
-    FROM
-        stops s
-    JOIN
-        stop_times st ON s.stop_id = st.stop_id
-    JOIN
-        trips t ON st.trip_id = t.trip_id
-    WHERE
-        t.trip_id IN (
-            SELECT
-                st_inner.trip_id
-            FROM
-                stop_times st_inner
-            JOIN
-                stops s_inner ON st_inner.stop_id = s_inner.stop_id
-            WHERE
-                s_inner.stop_name = 'Tempo'
-        )
-        AND s.stop_area = 'Narva linn';
-"""
+try:
+    current_user_time = datetime.now().strftime('%H:%M:%S')
+    print(current_user_time)
+    current_user_date = datetime.now().strftime('%Y%m%d')
 
-cursor.execute(initial_query)
-stop_ids = [row[0] for row in cursor.fetchall()]
-
-# Create a dictionary to store stop_sequence for each stop_id
-stop_sequence_dict = {}
-
-# Iterate over each stop_id and check stop_sequence
-for stop_id in stop_ids:
-    # Query to get stop_sequence for the given stop_id
-    sequence_query = f"""
-        SELECT
-            stop_sequence
-        FROM
-            stop_times
-        WHERE
-            stop_id = {stop_id}
+    calendar_query = """
+    SELECT service_id, monday, tuesday, wednesday, thursday, friday, saturday, sunday
+    FROM calendar
+    WHERE service_id IN %s
     """
-    cursor.execute(sequence_query)
-    stop_sequence = cursor.fetchone()
+    cursor.execute(calendar_query, (tuple(service_ids),))
+    calendar_data = cursor.fetchall()
 
-    if stop_sequence:
-        # Store stop_sequence in the dictionary
-        stop_sequence_dict[stop_id] = stop_sequence[0]
+    closest_arrivals = []
 
-# Close the cursor and connection
-cursor.close()
-conn.close()
+    current_day_of_week = datetime.now().weekday()
 
-# Now stop_sequence_dict contains stop_id as keys and stop_sequence as values
-print(stop_sequence_dict)
+    for service_id, _, _, _, _, _, _, _ in calendar_data:
+        service_index = service_ids.index(service_id)
+        arrival_time = arrival_times[service_index]
+        departure_time = departure_times[service_index]
+
+        if calendar_data[service_ids.index(service_id)][current_day_of_week + 1] == 1:
+            if arrival_time >= current_user_time:
+                closest_arrivals.append((service_id, arrival_time, "Today"))
+        if calendar_data[service_ids.index(service_id)][(current_day_of_week + 1) % 7 + 1] == 1:
+            closest_arrivals.append((service_id, arrival_time, "Tomorrow"))
+
+    closest_arrivals.sort(key=lambda x: (0 if x[2] == 'Today' else 1, x[1]))
+    closest_arrivals = closest_arrivals[:5]
+
+    print("Service ID\tArrival Time\tDay")
+    for arrival in closest_arrivals:
+        print(f"{arrival[0]}\t\t{arrival[1]}\t\t{arrival[2]}")
+
+finally:
+    cursor.close()
+    conn.close()
