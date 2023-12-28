@@ -238,7 +238,7 @@
                     const busButton = document.createElement("button");
                     const firstBus = buses[0];
                     busButton.textContent = `${firstBus.route_short_name} - ${firstBus.trip_long_name}`;
-                    
+
                     busButton.closestStop = firstBus.closest_stop;
                     console.log(firstBus.closest_stop)
                     busButton.serviceID = buses.map(bus => bus.service_id);
@@ -274,7 +274,7 @@
                 }
             });
 
-            function displayBusTimes(busButton) {
+            function displayBusTimesOld(busButton) {
                 const arrivalsContainer = document.getElementById('arrivals-container');
                 arrivalsContainer.innerHTML = "";
                 console.log(busButton.route_short_name)
@@ -283,6 +283,28 @@
                     arrivalItem.textContent = `Bus ${busButton.textContent}, Departure Time From Closest Stop (${busButton.closestStop}): ${busButton.bArrival[index]} Arrival Time to Destination: ${busButton.bDeparture[index]} SErvice ID ${busButton.serviceID[index]}`;
                     arrivalsContainer.appendChild(arrivalItem);
                 });
+            }
+
+            function displayBusTimes(busButton) {
+                const arrivalsContainer = document.getElementById('arrivals-container');
+                arrivalsContainer.innerHTML = "";
+
+                const params = new URLSearchParams({
+                    service_id: busButton.service_id,
+                    bDeparture: busButton.bDeparture,
+                    bArrival: busButton.bArrival
+                });
+
+                fetch(`/get_timetable?${params.toString()}`)
+                    .then(response => response.json())
+                    .then(timetableData => {
+                        timetableData.forEach((arrival, index) => {
+                            const arrivalItem = document.createElement("div");
+                            arrivalItem.textContent = `Bus ${busButton.textContent}, Departure Time From Closest Stop (${busButton.closestStop}): ${arrival.bArrival} Arrival Time to Destination: ${arrival.bDeparture} Service ID ${arrival.serviceID}`;
+                            arrivalsContainer.appendChild(arrivalItem);
+                        });
+                    })
+                    .catch(error => console.error('Error:', error));
             }
         });
 

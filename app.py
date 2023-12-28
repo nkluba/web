@@ -301,5 +301,14 @@ def get_closest_arrivals():
         return jsonify({'status': 'error', 'message': 'Error fetching arrivals'})
     
 
+@app.route('/get_timetable', methods=['GET'])
+def get_timetable():
+    service_id = request.args.get('service_id')
+    b_departure = request.args.get('bDeparture')
+    b_arrival = request.args.get('bArrival')
+    print(service_id, b_departure, b_arrival)
+    return []
+
+
 if __name__ == '__main__':
     app.run(debug=True)
