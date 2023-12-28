@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 import psycopg2
 from math import radians, sin, cos, sqrt, atan2
-import datetime
+from datetime import datetime, timedelta
 
 
 app = Flask(__name__)
@@ -303,46 +303,75 @@ def get_closest_arrivals():
 
 @app.route('/get_timetable', methods=['GET'])
 def get_timetable():
-    service_id = request.args.get('service_id').split(',')
-    b_departure = request.args.get('bDeparture').split(',')
-    b_arrival = request.args.get('bArrival').split(',')
-    print(service_id, b_departure, b_arrival)
+    #service_ids = request.args.get('service_id').split(',')
+    service_ids = [228467,230834,228469,230832,228461,230838,228437,228471,230831,228460,230839,228466,230835,230833,228470,230830,228464,230829,228465,230836]
+    departure_times = list(map(str, request.args.get('bDeparture').split(',')))
+    arrival_times = list(map(str, request.args.get('bArrival').split(',')))
+    print(service_ids)
+    print(arrival_times)
     conn = psycopg2.connect(db_connection_string)
     cursor = conn.cursor()
 
     try:
         current_user_time = datetime.now().strftime('%H:%M:%S')
-        current_user_date = datetime.now().strftime('%Y%m%d')
+
+        calendar_query = """
+        SELECT service_id, monday, tuesday, wednesday, thursday, friday, saturday, sunday
+        FROM calendar
+        WHERE service_id IN %s
+        """
+        cursor.execute(calendar_query, (tuple(service_ids),))
+        calendar_data = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
 
         closest_arrivals = []
 
-        for i in range(len(service_id)):
-            query = """
-            SELECT service_id, trip_long_name, route_short_name, b_departure, b_arrival
-            FROM your_table_name
-            WHERE service_id = %s
-            """
-            cursor.execute(query, (service_id[i],))
-            timetable_data = cursor.fetchall()
-            print(timetable_data)
-            for _, _, route_short_name, b_departure_db, b_arrival_db in timetable_data:
-                departure_time = datetime.strptime(b_departure_db, '%H:%M:%S').strftime('%H:%M:%S')
-                if departure_time > current_user_time and int(current_user_date) >= 20210501:
-                    closest_arrivals.append({
-                        'service_id': service_id[i],
-                        'route_short_name': route_short_name,
-                        'bDeparture': b_departure_db,
-                        'bArrival': b_arrival_db
-                    })
+        current_day_of_week = datetime.now().weekday()
 
-        closest_arrivals.sort(key=lambda x: x['bArrival'])
-        closest_arrivals = closest_arrivals[:5]
+        for service_id, _, _, _, _, _, _, _ in calendar_data:
 
-        return jsonify(closest_arrivals)
+            service_index = service_ids.index(service_id)
+            arrival_time = arrival_times[service_index]
+            departure_time = departure_times[service_index]
 
-    finally:
-        cursor.close()
-        conn.close()
+            if calendar_data[service_ids.index(service_id)][current_day_of_week + 1] == 1:
+                if departure_time >= current_user_time:
+                    closest_arrivals.append((service_id, arrival_time, departure_time, "Today"))
+            if calendar_data[service_ids.index(service_id)][(current_day_of_week + 1) % 7 + 1] == 1:
+                closest_arrivals.append((service_id, arrival_time, departure_time, "Tomorrow"))
+
+        closest_arrivals.sort(key=lambda x: (0 if x[3] == 'Today' else 1, x[1]))
+        closest_arrivals = [(x[1], x[2], x[3]) for x in closest_arrivals]
+
+        unique_arrivals = []
+        seen = set()
+        for arrival in closest_arrivals:
+            if arrival not in seen:
+                unique_arrivals.append(arrival)
+                seen.add(arrival)
+
+        unique_arrivals = unique_arrivals[:5]
+
+        #print("Arrival Time\tDeparture Time\tDay")
+        #for arrival in unique_arrivals:
+        #    print(f"{arrival[0]}\t\t{arrival[1]}\t\t{arrival[2]}")
+
+        result_data = []
+        for arrival in unique_arrivals:
+            result_data.append({
+                'bArrival': arrival[0],
+                'bDeparture': arrival[1],
+                'day': arrival[2]
+            })
+
+        return jsonify(result_data)
+
+    except Exception as e:
+        print("Error fetching timetable:", str(e))
+        return jsonify({'status': 'error', 'message': 'Error fetching timetable'})
+        
 
 
 if __name__ == '__main__':
