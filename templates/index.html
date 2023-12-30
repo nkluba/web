@@ -285,28 +285,27 @@
                 });
             }
 
-                    function displayBusTimes(busButton) {
-            const arrivalsContainer = document.getElementById('arrivals-container');
-            arrivalsContainer.innerHTML = "";
+            function displayBusTimes(busButton) {
+                const arrivalsContainer = document.getElementById('arrivals-container');
+                arrivalsContainer.innerHTML = "";
 
-            const params = new URLSearchParams({
-                service_id: busButton.serviceID,
-                bDeparture: busButton.bDeparture,
-                bArrival: busButton.bArrival
-            });
+                const params = new URLSearchParams({
+                    service_id: busButton.serviceID,
+                    bDeparture: busButton.bDeparture,
+                    bArrival: busButton.bArrival,
+                });
 
-            fetch(`/get_timetable?${params.toString()}`)
-                .then(response => response.json())
-                .then(timetableData => {
-                    timetableData.forEach((arrival, index) => {
-                        const arrivalItem = document.createElement("div");
-                        console.log(index)
-                        arrivalItem.textContent = `Bus ${busButton.textContent}, Departure Time From Closest Stop (${busButton.closestStop}): ${arrival.bDeparture} Arrival Time to Destination: ${arrival.bArrival}, Day: ${arrival.day}`;
-                        arrivalsContainer.appendChild(arrivalItem);
-                    });
-                })
-                .catch(error => console.error('Error:', error));
-        }
+                fetch(`/get_timetable?${params.toString()}`)
+                    .then(response => response.json())
+                    .then(timetableData => {
+                        timetableData.forEach((arrival, index) => {
+                            const arrivalItem = document.createElement("div");
+                            arrivalItem.textContent = `Bus ${busButton.textContent}, Departure Time From Closest Stop (${busButton.closestStop}): ${arrival.bDeparture} Arrival Time to Destination: ${arrival.bArrival}, Day: ${arrival.day}`;
+                            arrivalsContainer.appendChild(arrivalItem);
+                        });
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
         });
 
     </script>

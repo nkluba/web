@@ -303,8 +303,8 @@ def get_closest_arrivals():
 
 @app.route('/get_timetable', methods=['GET'])
 def get_timetable():
-    #service_ids = request.args.get('service_id').split(',')
-    service_ids = [228467,230834,228469,230832,228461,230838,228437,228471,230831,228460,230839,228466,230835,230833,228470,230830,228464,230829,228465,230836]
+    service_ids = list(map(int, request.args.get('service_id').split(',')))
+    #service_ids = [228467,230834,228469,230832,228461,230838,228437,228471,230831,228460,230839,228466,230835,230833,228470,230830,228464,230829,228465,230836]
     departure_times = list(map(str, request.args.get('bDeparture').split(',')))
     arrival_times = list(map(str, request.args.get('bArrival').split(',')))
     print(service_ids)
@@ -322,7 +322,6 @@ def get_timetable():
         """
         cursor.execute(calendar_query, (tuple(service_ids),))
         calendar_data = cursor.fetchall()
-
         cursor.close()
         conn.close()
 
@@ -331,7 +330,6 @@ def get_timetable():
         current_day_of_week = datetime.now().weekday()
 
         for service_id, _, _, _, _, _, _, _ in calendar_data:
-
             service_index = service_ids.index(service_id)
             arrival_time = arrival_times[service_index]
             departure_time = departure_times[service_index]
@@ -344,7 +342,6 @@ def get_timetable():
 
         closest_arrivals.sort(key=lambda x: (0 if x[3] == 'Today' else 1, x[1]))
         closest_arrivals = [(x[1], x[2], x[3]) for x in closest_arrivals]
-
         unique_arrivals = []
         seen = set()
         for arrival in closest_arrivals:
@@ -365,6 +362,8 @@ def get_timetable():
                 'bDeparture': arrival[1],
                 'day': arrival[2]
             })
+
+        print(result_data)
 
         return jsonify(result_data)
 
