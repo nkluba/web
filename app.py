@@ -37,14 +37,6 @@ def get_stops_for_region(region):
         print("Error fetching data from the database:", str(e))
         return []
 
-
-@app.route('/')
-def index():
-    regions = get_regions_from_database()
-    stops = get_stops_for_region(regions[0] if regions else "")
-    return render_template('index.html', regions=regions, stops=stops)
-
-
 @app.route('/get_stops', methods=['GET'])
 def get_stops():
     input_region = request.args.get('region')
@@ -137,23 +129,6 @@ def get_buses_for_stop():
         return jsonify({'buses': []})
 
 
-
-@app.route('/send_user_location', methods=['GET'])
-def receive_user_location():
-    try:
-        latitude = request.args.get('latitude')
-        longitude = request.args.get('longitude')
-        bus_route = request.args.get('bus_route')
-
-        print(f"User location received - Latitude: {latitude}, Longitude: {longitude}, Bus Route: {bus_route}")
-
-        return jsonify({'status': 'success', 'message': 'User location received successfully'})
-
-    except Exception as e:
-        print(f"Error processing user location: {str(e)}")
-        return jsonify({'status': 'error', 'message': 'Error processing user location'})
-
-
 def haversine(lat1, lon1, lat2, lon2):
     R = 6371.0
     dlat = radians(lat2 - lat1)
@@ -163,30 +138,9 @@ def haversine(lat1, lon1, lat2, lon2):
     distance = R * c
     return distance
 
+
 def get_trip_long_name(bus_route):
     return bus_route.split(' - ', 1)[1]
-
-def get_stops_for_trip(trip_long_name):
-    try:
-        connection = psycopg2.connect(db_connection_string)
-        cursor = connection.cursor()
-
-        cursor.execute("""
-            SELECT s.stop_name, s.stop_lat, s.stop_lon
-            FROM stops s
-            JOIN stop_times st ON s.stop_id = st.stop_id
-            JOIN trips t ON st.trip_id = t.trip_id
-            WHERE t.trip_long_name = %s
-        """, (trip_long_name,))
-
-        stops = [{'stop_id': row[0], 'stop_lat': row[1], 'stop_lon': row[2]} for row in cursor.fetchall()]
-
-        connection.close()
-        return stops
-
-    except Exception as e:
-        print("Error fetching stops from the database:", str(e))
-        return []
     
 
 def get_closest_stops(selected_stop, stop_area):
@@ -258,44 +212,6 @@ def get_closest_stop():
         print("Error processing user location:", str(e))
         return jsonify({'status': 'error', 'message': 'Error processing user location'})
 
-
-@app.route('/get_closest_arrivals', methods=['GET'])
-def get_closest_arrivals():
-    try:
-        bus_route = request.args.get('bus_route').split(' - ', 1)[1] #get Tehase - Kannuka part
-        closest_stop_name = request.args.get('closest_stop')
-        selected_stop_name = request.args.get('selected_stop')
-        connection = psycopg2.connect(db_connection_string)
-        cursor = connection.cursor()
-
-        cursor.execute("""
-            SELECT DISTINCT t.trip_long_name, st1.arrival_time, r.route_short_name
-            FROM stop_times st1
-            JOIN stop_times st2 ON st1.trip_id = st2.trip_id
-            JOIN stops s1 ON st1.stop_id = s1.stop_id
-            JOIN stops s2 ON st2.stop_id = s2.stop_id
-            JOIN trips t ON st1.trip_id = t.trip_id
-            JOIN routes r ON t.route_id = r.route_id
-            WHERE t.trip_long_name = %s
-                AND s1.stop_name = %s
-                AND s2.stop_name = %s
-                AND st1.stop_sequence < st2.stop_sequence
-            ORDER BY st1.arrival_time;
-        """, (bus_route, closest_stop_name, selected_stop_name))
-        user_time = datetime.datetime.strptime("10:00:00", "%H:%M:%S")
-
-        arrivals = [{
-            'trip_long_name': row[0],
-            'arrival_time': row[1],
-            'route_short_name': row[2]
-        } for row in cursor.fetchall() if datetime.datetime.strptime(row[1], "%H:%M:%S") > user_time]
-
-        return jsonify({'status': 'success', 'arrivals': arrivals, 'closest_stop_id': closest_stop_name})
-
-    except Exception as e:
-        print("Error fetching arrivals from the database:", str(e))
-        return jsonify({'status': 'error', 'message': 'Error fetching arrivals'})
-    
 
 @app.route('/get_timetable', methods=['GET'])
 def get_timetable():
