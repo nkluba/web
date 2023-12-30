@@ -37,6 +37,14 @@ def get_stops_for_region(region):
         print("Error fetching data from the database:", str(e))
         return []
 
+
+@app.route('/')
+def index():
+    regions = get_regions_from_database()
+    stops = get_stops_for_region(regions[0] if regions else "")
+    return render_template('index.html', regions=regions, stops=stops)
+
+
 @app.route('/get_stops', methods=['GET'])
 def get_stops():
     input_region = request.args.get('region')
