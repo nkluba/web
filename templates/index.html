@@ -127,8 +127,10 @@
             const stopForm = document.getElementById("stop-form");
             const busList = document.getElementById("bus-list");
             const busListContainer = document.getElementById("bus-list-container");
+            busListContainer.innerHTML = '';
 
             const arrivalsContainer = document.getElementById('arrivals-container');
+            arrivalsContainer.innerHTML = '';
 
             const clearButton = document.getElementById("clear-button");
 
@@ -145,6 +147,7 @@
 
             function clearBusAndArrivals() {
                 busList.innerHTML = '';
+                busListContainer.innerHTML = '';
                 arrivalsContainer.innerHTML = '';
             }
 
