@@ -30,7 +30,8 @@
             background-color: #ddd;
         }
 
-        #region-input, #stop-input {
+        #region-input,
+        #stop-input {
             width: 100%;
         }
 
@@ -54,7 +55,8 @@
                     <form id="region-form">
                         <label for="region-autocomplete" class="form-label">Select a Region</label>
                         <div id="region-autocomplete" class="autocomplete">
-                            <input type="text" id="region-input" class="form-control" placeholder="Type a region..." name="region">
+                            <input type="text" id="region-input" class="form-control" placeholder="Type a region..."
+                                name="region">
                             <div id="region-list" class="autocomplete-list"></div>
                         </div>
                         <button id="submit-region" type="button" class="btn btn-primary">Submit Region</button>
@@ -65,7 +67,8 @@
                     <form id="stop-form" action="/search" method="get">
                         <label for="stop-autocomplete" class="form-label">Select a Stop</label>
                         <div id="stop-autocomplete" class="autocomplete">
-                            <input type="text" id="stop-input" class="form-control" placeholder="Type a stop..." name="stop">
+                            <input type="text" id="stop-input" class="form-control" placeholder="Type a stop..."
+                                name="stop">
                             <div id="stop-list" class="autocomplete-list"></div>
                         </div>
                         <button type="submit" class="btn btn-primary">Submit</button>
@@ -307,20 +310,20 @@
             });
 
             function displayBusTimes(busButton) {
-    arrivalsContainer.innerHTML = ""; 
+                arrivalsContainer.innerHTML = "";
 
-    const params = new URLSearchParams({
-        service_id: busButton.serviceID,
-        bDeparture: busButton.bDeparture,
-        bArrival: busButton.bArrival,
-    });
+                const params = new URLSearchParams({
+                    service_id: busButton.serviceID,
+                    bDeparture: busButton.bDeparture,
+                    bArrival: busButton.bArrival,
+                });
 
-    fetch(`/get_timetable?${params.toString()}`)
-        .then(response => response.json())
-        .then(timetableData => {
-            timetableData.forEach((arrival, index) => {
-                const arrivalItem = document.createElement("div");
-                arrivalItem.innerHTML = `
+                fetch(`/get_timetable?${params.toString()}`)
+                    .then(response => response.json())
+                    .then(timetableData => {
+                        timetableData.forEach((arrival, index) => {
+                            const arrivalItem = document.createElement("div");
+                            arrivalItem.innerHTML = `
                 <div class="card mb-3">
                         <div class="card-body">
                             <h5 class="card-title">${busButton.textContent}</h5>
@@ -337,11 +340,11 @@
                         </div>
                     </div>
                 `;
-                arrivalsContainer.appendChild(arrivalItem);
-            });
-        })
-        .catch(error => console.error('Error:', error));
-}
+                            arrivalsContainer.appendChild(arrivalItem);
+                        });
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
         });
 
     </script>
