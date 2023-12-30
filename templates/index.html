@@ -274,17 +274,6 @@
                 }
             });
 
-            function displayBusTimesOld(busButton) {
-                const arrivalsContainer = document.getElementById('arrivals-container');
-                arrivalsContainer.innerHTML = "";
-                console.log(busButton.route_short_name)
-                busButton.bDeparture.forEach((departure, index) => {
-                    const arrivalItem = document.createElement("div");
-                    arrivalItem.textContent = `Bus ${busButton.textContent}, Departure Time From Closest Stop (${busButton.closestStop}): ${busButton.bDeparture[index]} Arrival Time to Destination: ${busButton.bArrival[index]}`;
-                    arrivalsContainer.appendChild(arrivalItem);
-                });
-            }
-
             function displayBusTimes(busButton) {
                 const arrivalsContainer = document.getElementById('arrivals-container');
                 arrivalsContainer.innerHTML = "";
