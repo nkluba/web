@@ -91,6 +91,8 @@
             const busList = document.getElementById("bus-list");
             const busListContainer = document.getElementById("bus-list-container");
 
+            const arrivalsContainer = document.getElementById('arrivals-container');
+
             const clearButton = document.getElementById("clear-button");
 
             clearButton.addEventListener("click", function () {
@@ -102,6 +104,20 @@
 
                 busList.innerHTML = '';
                 arrivalsContainer.innerHTML = '';
+            });
+
+            function clearBusAndArrivals() {
+                busList.innerHTML = '';
+                arrivalsContainer.innerHTML = '';
+            }
+
+            regionInput.addEventListener("change", function () {
+                stopInput.value = '';
+                clearBusAndArrivals();
+            });
+
+            stopInput.addEventListener("change", function () {
+                clearBusAndArrivals();
             });
 
             submitRegionButton.addEventListener("click", function () {
@@ -286,7 +302,6 @@
             });
 
             function displayBusTimes(busButton) {
-                const arrivalsContainer = document.getElementById('arrivals-container');
                 arrivalsContainer.innerHTML = "";
 
                 const params = new URLSearchParams({
