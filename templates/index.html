@@ -321,14 +321,18 @@
             timetableData.forEach((arrival, index) => {
                 const arrivalItem = document.createElement("div");
                 arrivalItem.innerHTML = `
-                    <div class="card mb-3">
+                <div class="card mb-3">
                         <div class="card-body">
-                            <p class="card-text">
-                                Bus ${busButton.textContent}, 
-                                Departure Time From Closest Stop (${busButton.closestStop}): 
-                                ${arrival.bDeparture} 
+                            <h5 class="card-title">${busButton.textContent}</h5>
+                            <p class="card-subtitle mb-2 text-muted">
+                                Departure Time From Closest Stop 
+                                (<span class="fw-bold text-primary">${busButton.closestStop}</span>): 
+                                <span class="fw-bold text-primary">${arrival.bDeparture}</span>
+                            </p>
+                            <p class="card-subtitle mb-2 text-muted">
                                 Arrival Time to Destination: 
-                                ${arrival.bArrival}, Day: ${arrival.day}
+                                <span class="fw-bold text-primary">${arrival.bArrival}</span>, 
+                                Day: <span class="fw-bold text-primary">${arrival.day}</span>
                             </p>
                         </div>
                     </div>
