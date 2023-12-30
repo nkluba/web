@@ -128,8 +128,6 @@ def get_buses_for_stop():
             'closest_stop' : closest_stop,
         } for row in cursor.fetchall()]
 
-        print(buses)
-
         connection.close()
 
         return jsonify({'buses': buses})
@@ -266,9 +264,7 @@ def get_closest_arrivals():
     try:
         bus_route = request.args.get('bus_route').split(' - ', 1)[1] #get Tehase - Kannuka part
         closest_stop_name = request.args.get('closest_stop')
-        print(closest_stop_name)
         selected_stop_name = request.args.get('selected_stop')
-        print(selected_stop_name)
         connection = psycopg2.connect(db_connection_string)
         cursor = connection.cursor()
 
@@ -304,11 +300,8 @@ def get_closest_arrivals():
 @app.route('/get_timetable', methods=['GET'])
 def get_timetable():
     service_ids = list(map(int, request.args.get('service_id').split(',')))
-    #service_ids = [228467,230834,228469,230832,228461,230838,228437,228471,230831,228460,230839,228466,230835,230833,228470,230830,228464,230829,228465,230836]
     departure_times = list(map(str, request.args.get('bDeparture').split(',')))
     arrival_times = list(map(str, request.args.get('bArrival').split(',')))
-    print(service_ids)
-    print(arrival_times)
     conn = psycopg2.connect(db_connection_string)
     cursor = conn.cursor()
 
@@ -351,10 +344,6 @@ def get_timetable():
 
         unique_arrivals = unique_arrivals[:5]
 
-        #print("Arrival Time\tDeparture Time\tDay")
-        #for arrival in unique_arrivals:
-        #    print(f"{arrival[0]}\t\t{arrival[1]}\t\t{arrival[2]}")
-
         result_data = []
         for arrival in unique_arrivals:
             result_data.append({
@@ -362,8 +351,6 @@ def get_timetable():
                 'bDeparture': arrival[1],
                 'day': arrival[2]
             })
-
-        print(result_data)
 
         return jsonify(result_data)
 
