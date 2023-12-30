@@ -70,6 +70,8 @@
                 <div class="mb-4" id="arrivals-container">
                     <h3>Closest Arrivals</h3>
                 </div>
+
+                <button id="clear-button" type="button">Clear All</button>
             </div>
         </div>
     </div>
@@ -88,6 +90,19 @@
             const stopForm = document.getElementById("stop-form");
             const busList = document.getElementById("bus-list");
             const busListContainer = document.getElementById("bus-list-container");
+
+            const clearButton = document.getElementById("clear-button");
+
+            clearButton.addEventListener("click", function () {
+                regionInput.value = '';
+                stopInput.value = '';
+
+                regionList.innerHTML = '';
+                stopList.innerHTML = '';
+
+                busList.innerHTML = '';
+                arrivalsContainer.innerHTML = '';
+            });
 
             submitRegionButton.addEventListener("click", function () {
                 const selectedRegion = regionInput.value;
