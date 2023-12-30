@@ -2,12 +2,13 @@ from flask import Flask, render_template, request, jsonify
 import psycopg2
 from math import radians, sin, cos, sqrt, atan2
 from datetime import datetime, timedelta
+import os
 
 
 app = Flask(__name__)
 
-db_connection_string = "postgresql://lubandust:J9fF3NPzVeXW@ep-holy-cake-07968363.eu-central-1.aws.neon.tech/peatus?sslmode=require"
-
+db_password = os.environ.get("DB_PASSWORD")
+db_connection_string = f"postgresql://lubandust:{db_password}@ep-holy-cake-07968363.eu-central-1.aws.neon.tech/peatus?sslmode=require"
 
 def get_regions_from_database():
     try:
