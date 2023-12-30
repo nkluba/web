@@ -2,8 +2,8 @@ import os
 import pandas as pd
 from sqlalchemy import create_engine
 
-db_url = 'postgresql://lubandust:J9fF3NPzVeXW@ep-holy-cake-07968363.eu-central-1.aws.neon.tech/peatus?sslmode=require'
-folder_path = 'gtfs/'
+db_password = os.environ.get("DB_PASSWORD")
+db_connection_string = f"postgresql://lubandust:{db_password}@ep-holy-cake-07968363.eu-central-1.aws.neon.tech/peatus?sslmode=require"
 
 engine = create_engine(db_url)
 
