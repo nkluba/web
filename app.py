@@ -25,6 +25,7 @@ def get_regions_from_database():
         return []
 
 
+# get stops of selected region
 def get_stops_for_region(region):
     try:
         connection = psycopg2.connect(db_connection_string)
@@ -98,6 +99,12 @@ def get_regions_autocomplete():
     return jsonify({'regions': regions})
 
 
+# select values for further timetable build and for its display
+# stop_sequence condition is user to setermine if bus goes from stop1 to stop2 or in other turn
+# to avoid cases with directions mismatch
+# + it's assumed that stops with the same name are located close to each other
+# for example both stops in Narva in both directions are called 'Tempo'
+
 @app.route('/get_buses', methods=['GET'])
 def get_buses_for_stop():
     selected_stop = request.args.get('stop')
@@ -142,6 +149,7 @@ def get_buses_for_stop():
         return jsonify({'buses': []})
 
 
+# count distance between stops to get closest
 def haversine(lat1, lon1, lat2, lon2):
     R = 6371.0
     dlat = radians(lat2 - lat1)
@@ -156,6 +164,7 @@ def get_trip_long_name(bus_route):
     return bus_route.split(' - ', 1)[1]
     
 
+# get closest stop with same stop_sequence condition
 def get_closest_stops(selected_stop, stop_area):
     try:
         connection = psycopg2.connect(db_connection_string)
@@ -202,6 +211,7 @@ def get_closest_stops(selected_stop, stop_area):
         return []
     
 
+# return closest stop for frontend
 @app.route('/get_closest_stop', methods=['GET'])
 def get_closest_stop():
     try:
@@ -226,6 +236,11 @@ def get_closest_stop():
         return jsonify({'status': 'error', 'message': 'Error processing user location'})
 
 
+# build timetable from given buses basing on timetable of service_id
+# consisting of days of week + trips at that time per day
+# also build it for tomorrow day (will be cut if today's date and time after user time)
+# have five or more trips
+    
 @app.route('/get_timetable', methods=['GET'])
 def get_timetable():
     service_ids = list(map(int, request.args.get('service_id').split(',')))
@@ -256,15 +271,22 @@ def get_timetable():
             arrival_time = arrival_times[service_index]
             departure_time = departure_times[service_index]
 
+            # if bus departure happens after user time and today, write it and save with 'Today' mark
+
             if calendar_data[service_ids.index(service_id)][current_day_of_week + 1] == 1:
                 if departure_time >= current_user_time:
                     closest_arrivals.append((service_id, arrival_time, departure_time, "Today"))
             if calendar_data[service_ids.index(service_id)][(current_day_of_week + 1) % 7 + 1] == 1:
                 closest_arrivals.append((service_id, arrival_time, departure_time, "Tomorrow"))
 
+        # sort
+                
         closest_arrivals.sort(key=lambda x: (0 if x[3] == 'Today' else 1, x[1]))
         closest_arrivals = [(x[1], x[2], x[3]) for x in closest_arrivals]
         unique_arrivals = []
+
+        # get unique ones so trips happening at the same time are not displayed twice
+        
         seen = set()
         for arrival in closest_arrivals:
             if arrival not in seen:
