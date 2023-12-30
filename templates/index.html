@@ -271,20 +271,15 @@
                     busButton.textContent = `${firstBus.route_short_name} - ${firstBus.trip_long_name}`;
 
                     busButton.closestStop = firstBus.closest_stop;
-                    console.log(firstBus.closest_stop)
                     busButton.serviceID = buses.map(bus => bus.service_id);
                     busButton.bDeparture = buses.map(bus => bus.b_departure);
                     busButton.bArrival = buses.map(bus => bus.b_arrival);
-                    console.log(busButton.bDeparture)
-                    console.log(busButton.bArrival)
-                    console.log(busButton.serviceID)
 
                     busList.appendChild(busButton);
                 });
             }
 
             function getClosestStop(userLatitude, userLongitude, selectedStop, selectedRegion) {
-                console.log(selectedRegion)
                 return fetch(`/get_closest_stop?longitude=${userLongitude}&latitude=${userLatitude}&selected_stop=${selectedStop}&stop_area=${selectedRegion}`)
                     .then(response => response.json())
                     .catch(error => {
