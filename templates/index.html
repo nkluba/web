@@ -157,6 +157,7 @@
                 clearBusAndArrivals();
             });
 
+            //get stops when region button is clicked
             submitRegionButton.addEventListener("click", function () {
                 const selectedRegion = regionInput.value;
 
@@ -168,6 +169,9 @@
                 }
             });
 
+            //get user location, query db for all bus routes where stop1 (closest to user location) is before stop2 by sequence
+            //so user won't get buses on which he can't ride to the desired stop
+            //select closest stop which fits that conditons and query buses
             stopForm.addEventListener("submit", function (event) {
                 event.preventDefault();
                 const selectedStop = stopInput.value;
@@ -178,7 +182,7 @@
                         function (position) {
                             const userLatitude = position.coords.latitude;
                             const userLongitude = position.coords.longitude;
-
+                            //get closest stop which fits to the condition described above
                             const closestStopPromise = getClosestStop(userLatitude, userLongitude, selectedStop, selectedRegion);
 
                             closestStopPromise.then((result) => {
@@ -283,6 +287,7 @@
                 });
             }
 
+            //sort by route_short_name, set service_id (for timetable per week), arrival and departure times for each bus
             function displayBusList(buses) {
                 const uniqueBusesMap = new Map();
 
@@ -334,6 +339,7 @@
                 }
             });
 
+            //get top 5 closest arrivals for today and (if not sufficient) tomorrow
             function displayBusTimes(busButton) {
                 arrivalsContainer.innerHTML = "";
 
