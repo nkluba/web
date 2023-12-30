@@ -4,74 +4,49 @@
 <head>
     <meta charset="UTF-8">
     <title>Region and City Selection</title>
-    <style>
-        .autocomplete {
-            position: relative;
-            display: inline-block;
-        }
-
-        .autocomplete-list {
-            position: absolute;
-            z-index: 1;
-            width: 100%;
-            background-color: #f1f1f1;
-            max-height: 150px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-        }
-
-        .autocomplete-list div {
-            padding: 10px;
-            cursor: pointer;
-        }
-
-        .autocomplete-list div:hover {
-            background-color: #ddd;
-        }
-    </style>
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
 <body>
 
-    <div class="container mx-auto mt-10 bg-white">
-        <div class="mb-4 p-6">
-            <h2>Select a Region and City in Estonia</h2>
+    <div class="container mt-5">
+        <div class="mb-4 p-4 bg-light">
+            <h2 class="text-primary">Select a Region and City in Estonia</h2>
         </div>
-        <div class="p-6">
+        <div class="p-4">
             <div class="mb-4">
                 <div class="mb-4">
                     <form id="region-form">
-                        <label for="region-autocomplete">Select a Region</label>
+                        <label for="region-autocomplete" class="form-label">Select a Region</label>
                         <div id="region-autocomplete" class="autocomplete">
-                            <input type="text" id="region-input" placeholder="Type a region..." name="region">
+                            <input type="text" id="region-input" class="form-control" placeholder="Type a region..." name="region">
                             <div id="region-list" class="autocomplete-list"></div>
                         </div>
-                        <button id="submit-region" type="button">Submit Region</button>
+                        <button id="submit-region" type="button" class="btn btn-primary">Submit Region</button>
                     </form>
                 </div>
 
                 <div class="mb-4">
                     <form id="stop-form" action="/search" method="get">
-                        <label for="stop-autocomplete">Select a Stop</label>
+                        <label for="stop-autocomplete" class="form-label">Select a Stop</label>
                         <div id="stop-autocomplete" class="autocomplete">
-                            <input type="text" id="stop-input" placeholder="Type a stop..." name="stop">
+                            <input type="text" id="stop-input" class="form-control" placeholder="Type a stop..." name="stop">
                             <div id="stop-list" class="autocomplete-list"></div>
                         </div>
-                        <button type="submit">Submit</button>
+                        <button type="submit" class="btn btn-primary">Submit</button>
                     </form>
                 </div>
 
                 <div class="mb-4" id="bus-list-container">
-                    <h3>List of Buses</h3>
+                    <h3 class="text-primary">List of Buses</h3>
                     <div id="bus-list"></div>
                 </div>
 
                 <div class="mb-4" id="arrivals-container">
-                    <h3>Closest Arrivals</h3>
+                    <h3 class="text-primary">Closest Arrivals</h3>
                 </div>
 
-                <button id="clear-button" type="button">Clear All</button>
+                <button id="clear-button" type="button" class="btn btn-danger">Clear All</button>
             </div>
         </div>
     </div>

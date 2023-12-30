@@ -51,7 +51,9 @@ def get_stops():
     input_stop = request.args.get('stop')
 
     stops = get_stops_for_region_and_stop(input_region, input_stop)
+
     return jsonify({'stops': stops})
+
 
 def get_stops_for_region_and_stop(region, stop):
     try:
@@ -70,6 +72,7 @@ def get_stops_for_region_and_stop(region, stop):
     except Exception as e:
         print("Error fetching data from the database:", str(e))
         return []
+
 
 def get_regions_from_database_autocomplete(input_text):
     try:
@@ -92,6 +95,7 @@ def get_regions_autocomplete():
     regions = get_regions_from_database_autocomplete(input_text)
 
     return jsonify({'regions': regions})
+
 
 @app.route('/get_buses', methods=['GET'])
 def get_buses_for_stop():
