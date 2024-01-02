@@ -62,6 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const selectedRegion = regionInput.value;
 
         if (selectedStop) {
+            document.getElementById('spinner').style.display = 'block';
             navigator.geolocation.getCurrentPosition(
                 function (position) {
                     const userLatitude = position.coords.latitude;
@@ -74,7 +75,10 @@ document.addEventListener("DOMContentLoaded", function () {
                         fetch(`/get_buses?stop=${selectedStop}&region=${selectedRegion}&closest_stop=${closestStopId}`)
                             .then(response => response.json())
                             .then(data => displayBusList(data.buses))
-                            .catch(error => console.error('Error fetching buses:', error));
+                            .catch(error => console.error('Error fetching buses:', error))
+                            .finally(() => {
+                                document.getElementById('spinner').style.display = 'none';
+                            });
                     }).catch((error) => {
                         console.error('Error getting closest stop:', error);
                     });
@@ -113,6 +117,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let selectedStopId;
 
+
     stopInput.addEventListener("input", function () {
         const inputValue = this.value.toLowerCase();
         const selectedRegion = regionInput.value;
@@ -123,7 +128,7 @@ document.addEventListener("DOMContentLoaded", function () {
         fetch(`/get_stops?region=${selectedRegion}&stop=${inputValue}`)
             .then(response => response.json())
             .then(data => {
-                if (inputValue === stopInputValue && selectedRegion === regionInputValue) {
+                if (inputValue === stopInputValue) {
                     data.stops.forEach(stop => {
                         const listItem = document.createElement("div");
                         listItem.textContent = stop.stop_name;
