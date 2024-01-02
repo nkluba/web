@@ -7,7 +7,7 @@ import os
 
 app = Flask(__name__, static_folder='static')
 
-db_password = os.environ.get("DB_PASSWORD")
+db_password = "9eoLDuPBY0qT"
 db_connection_string = f"postgresql://lubandust:{db_password}@ep-holy-cake-07968363.eu-central-1.aws.neon.tech/peatus?sslmode=require"
 
 def get_regions_from_database():

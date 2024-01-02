@@ -87,24 +87,26 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     regionInput.addEventListener("input", function () {
-
         const inputValue = this.value.toLowerCase();
+        regionInputValue = inputValue;
 
         regionList.innerHTML = "";
 
         fetch(`/get_regions_autocomplete?input=${inputValue}`)
             .then(response => response.json())
             .then(data => {
-                data.regions.forEach(region => {
-                    const listItem = document.createElement("div");
-                    listItem.textContent = region;
-                    listItem.addEventListener("click", function () {
-                        regionInput.value = region;
-                        regionList.innerHTML = "";
-                        //fetchStopsAndUpdateDropdown();
+                if (inputValue === regionInputValue) {
+                    data.regions.forEach(region => {
+                        const listItem = document.createElement("div");
+                        listItem.textContent = region;
+                        listItem.addEventListener("click", function () {
+                            regionInput.value = region;
+                            regionList.innerHTML = "";
+                            //fetchStopsAndUpdateDropdown();
+                        });
+                        regionList.appendChild(listItem);
                     });
-                    regionList.appendChild(listItem);
-                });
+                }
             })
             .catch(error => console.error('Error fetching regions:', error));
     });
@@ -114,22 +116,25 @@ document.addEventListener("DOMContentLoaded", function () {
     stopInput.addEventListener("input", function () {
         const inputValue = this.value.toLowerCase();
         const selectedRegion = regionInput.value;
+        stopInputValue = inputValue;
 
         stopList.innerHTML = "";
 
         fetch(`/get_stops?region=${selectedRegion}&stop=${inputValue}`)
             .then(response => response.json())
             .then(data => {
-                data.stops.forEach(stop => {
-                    const listItem = document.createElement("div");
-                    listItem.textContent = stop.stop_name;
-                    listItem.addEventListener("click", function () {
-                        stopInput.value = stop.stop_name;
-                        stopList.innerHTML = "";
-                        selectedStopId = stop.stop_name;
+                if (inputValue === stopInputValue && selectedRegion === regionInputValue) {
+                    data.stops.forEach(stop => {
+                        const listItem = document.createElement("div");
+                        listItem.textContent = stop.stop_name;
+                        listItem.addEventListener("click", function () {
+                            stopInput.value = stop.stop_name;
+                            stopList.innerHTML = "";
+                            selectedStopId = stop.stop_name;
+                        });
+                        stopList.appendChild(listItem);
                     });
-                    stopList.appendChild(listItem);
-                });
+                }
             })
             .catch(error => console.error('Error fetching stops:', error));
     });
