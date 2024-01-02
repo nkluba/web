@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import os
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 
 db_password = os.environ.get("DB_PASSWORD")
 db_connection_string = f"postgresql://lubandust:{db_password}@ep-holy-cake-07968363.eu-central-1.aws.neon.tech/peatus?sslmode=require"
