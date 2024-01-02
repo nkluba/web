@@ -250,8 +250,20 @@ def get_timetable():
     cursor = conn.cursor()
 
     try:
-        current_user_time = datetime.now().strftime('%H:%M:%S')
+        #current_user_time = datetime.now().strftime('%H:%M:%S')
+        #current_user_time = request.args.get('user_time', default=datetime.now().strftime('%H:%M:%S'), type=str)
 
+        user_time_param = request.args.get('user_time')
+
+        print(user_time_param)
+        
+        # Convert the user_time_param to a datetime object
+        current_user_time_str = datetime.strptime(user_time_param, '%H:%M:%S') if user_time_param else datetime.now()
+
+        # Format the user's current time as '06:20:00'
+        current_user_time = current_user_time_str.strftime('%H:%M:%S')
+
+        print(current_user_time)
         calendar_query = """
         SELECT service_id, monday, tuesday, wednesday, thursday, friday, saturday, sunday
         FROM calendar

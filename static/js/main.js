@@ -241,6 +241,7 @@ document.addEventListener("DOMContentLoaded", function () {
             service_id: busButton.serviceID,
             bDeparture: busButton.bDeparture,
             bArrival: busButton.bArrival,
+            user_time: new Date().toLocaleTimeString('en-US', { hour12: false }),
         });
 
         fetch(`/get_timetable?${params.toString()}`)
